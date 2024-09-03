@@ -1,0 +1,108 @@
+#!/usr/bin/env node
+
+const { ethers } = require("ethers");
+_ethers = ethers;
+
+async function _get(
+  _contract_address,
+  _contract_method,
+  _network_provider) {
+  _contract = new _ethers.BaseContract(
+    _contract_address,
+    _contract_abi,
+    runner=_network_provider);
+    _method = _contract.getFunction(
+      _contract_method);
+    _value = await _method.staticCall();
+  return _value;
+}
+
+function _get_provider(
+  _network,
+  _etherscan_key) {
+  _provider = _ethers.getDefaultProvider(
+    _network,
+    { etherscan: _etherscan_key,
+      exclusive: [
+        "etherscan",
+        "infura"
+      ]});
+  return _provider;
+}
+
+async function _contract_run() {
+  _network_provider = _get_provider(
+    _target_network,
+    _etherscan_key);
+  _value = await _get(
+    _contract_address,
+    _contract_method,
+    _network_provider);
+  console.log(
+    _value);
+}
+
+function _cmdline_parse() {
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        _contract_address = _value
+      }
+      if ( _index == 3 ) {
+        _contract_method = _value
+      }
+      if ( _index == 4 ) {
+        _contract_abi = _value
+      }
+      if ( _index == 5 ) {
+        _target_network = _value
+      }
+      if ( _index == 6 ) {
+        _etherscan_key = _value
+      }
+  });
+}
+
+_cmdline_parse();
+_contract_run();
+
+// etherscan="B189WG6DNRX232N2TNVNGJ3NZZ9NWJGVBZ"
+// elonindex="0x1b17016a9012f35b79f0835f513ebe0a6a8623d0";
+// provider = get_provider();
+// _get(z
+//   elonindex,
+//   "symbol")
+
+// di = new ethers.BaseContract(
+//   "0x1b17016a9012f35b79f0835f513ebe0a6a8623d0",
+//   abi,
+//   runner=provider)
+// wow = di.getFunction(
+//         "balanceOf")
+// di.balanceOf()
+// name = di.symbol();
+// console.log(name);
+// res = await name.staticCall()
+// console.log(res);
+
+// If you don't specify a //url//, Ethers connects to the default 
+// (i.e. ``http:/\/localhost:8545``)
+// const provider = new ethers.providers.JsonRpcProvider();
+
+// The provider also allows signing transactions to
+// send ether and pay to change state within the blockchain.
+// For this, we need the account signer...
+// const signer = provider.getSigner()
+
+
+// const ethereum = (window as any).ethereum;
+// const accounts = await ethereum.request({
+//   method: "eth_requestAccounts",
+// });
+
+// const provider = new ethers.providers.Web3Provider(ethereum)
+// const walletAddress = accounts[0]    // first account in MetaMask
+// const signer = provider.getSigner(walletAddress)

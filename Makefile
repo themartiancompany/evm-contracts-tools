@@ -19,7 +19,7 @@ install: install-scripts install-doc
 
 install-scripts:
 
-	install -vDm 755 evm-contracts-tools/evm-contract-static-call "$(BIN_DIR)/evm-contract-static-call"
+	install -vDm 755 evm-contracts-tools/evm-contract-call-static "$(BIN_DIR)/evm-contract-call-static"
 	install -vDm 755 evm-contracts-tools/evm-contract-call "$(BIN_DIR)/evm-contract-call"
 
 install-doc:

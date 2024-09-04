@@ -14,13 +14,11 @@ source \
 
 # shellcheck disable=SC2034
 _global_variables() {
-  target_command=""
-  target_profile=""
-  target_address=""
-  target_port=""
-  target_password=""
-  target_key=""
-  target_value=""
+  target_network=""
+  contract_address=""
+  contract_method=""
+  contract_abi=""
+  etherscan_key=""
   color=""
   quiet=""
 }
@@ -29,21 +27,8 @@ _requirements() {
   local \
     _app
     _check_cmd \
-      'app-installed' \
-      'android-app-utils'
-    _app="$( \
-      app-installed \
-        'com.coboltforge.dontmind.multivnc')"
-    if [[ "${_app}" != "true" ]]; then
-      _msg_error \
-        'MultiVNC not installed.'
-    fi
-    _check_cmd \
-      "sqlite3" \
-      "sqlite"
-    _check_cmd \
-      "su" \
-      "tsu"
+      'node' \
+      'nodejs'
 }
 
 _get_conf_dir_path() {
@@ -57,375 +42,65 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
-_multivnc_helper() {
+_evm_contract_call_type() {
+  evm-contract-call-static
+}
+
+_evm_contract_call() {
   local \
-    _command="${1}" \
+    _call_type="${1}" \
+    _contract_address="${2}" \
+    _contract_method="${3}" \
+    _contract_abi="${4}" \
+    _target_network="${5}" \
+    _etherscan_api="${6}" \
     _cmd \
     _args=() \
-    _app \
-    _db \
-    _type
-  _app="com.coboltforge.dontmind.multivnc"
-  _db="/data/data/${_app}/databases/VncDatabase"
-  if [[ "${_command}" == "get" ]]; then
-    _obj="profile"
-    _type="key_value"
-    _cmd="_${_obj}_${_type}_${_command}"
+  if [[ "${_call_type}" == "static" ]]; then
+    _cmd="evm-contract-call-${_call_type}"
     _args+=(
       "$( \
         _get \
-          "target" \
-          "profile")"
-      "$( \
-        _get \
-          "target" \
-          "key")"
-      )
-  elif [[ "${_command}" == "set" ]]; then
-    _obj="profile"
-    _type="key_value"
-    _cmd="_${_obj}_${_type}_${_command}"
-    _args+=(
-      "$( \
-        _get \
-          "target" \
-          "profile")"
-      "$( \
-        _get \
-          "target" \
-          "key")"
-      "$( \
-        _get \
-          "target" \
-          "value")"
-    )
-  elif [[ "${_command}" == "add" ]]; then
-    _obj="profile"
-    _cmd="_${_obj}_${_command}"
-    _args+=(
-      "$( \
-        _get \
-          "target" \
-          "profile")"
-      "$( \
-        _get \
-          "target" \
+          "contract" \
           "address")"
       "$( \
         _get \
-          "target" \
-          "port")"
+          "contract" \
+          "method")"
+      "$( \
+        _get \
+          "contract" \
+          "abi")"
       "$( \
         _get \
           "target" \
-          "password")"
+          "network")"
+      "$( \
+        _get \
+          "etherscan" \
+          "key")"
     )
-  elif \
-    [[ "${_command}" == "backup" ]] || \
-    [[ "${_command}" == "restore" ]]; then
-    _obj="db"
-    _cmd="_${_obj}_${_command}"
-  elif [[ "${_command}" == "dump" ]]; then
-    _obj="db"
-    _cmd="_${_obj}_${_command}"
   fi
   "${_cmd}" \
     "${_args[@]}"
 }
 
-_db_backup() {
-  local \
-    _cmd=() \
-    _dest
-  _dest="$( \
-    _get_conf_dir_path)"
-  _msg_info \
-    "backing up to '${_dest}'"
-  _cmd=(
-    cp
-      -a
-      "${_db}"
-      "${_dest}"
-  )
-  su \
-    -c \
-    "${_cmd[*]}"
-}
-
-_db_restore() {
-  local \
-    _cmd=() \
-    _src
-  _src="$( \
-    _get_conf_dir_path)/VncDatabase"
-  _msg_info \
-    "restoring from '${_src}'"
-  _cmd=(
-    cp
-      -a
-      "${_src}"
-      "${_db}"
-  )
-  su \
-    -c \
-    "${_cmd[*]}"
-}
-
-_profile_add() {
-  local \
-    _profile="${1}" \
-    _address="${2}" \
-    _port="${3}" \
-    _password="${4}" \
-    _db_cmd=() \
-    _entry=() \
-    _opts=() \
-    _table
-  _table="CONNECTION_BEAN"
-  _opts=(
-    "tight"
-    "zrle"
-    "ultra"
-    "copyrect"
-    "hextile"
-    "zlib"
-    "corre"
-    "rre"
-    "trle"
-    "zywrle"
-    "raw"
-  )
-  _entry=(
-    1
-    "'${_profile}'"
-    "'${_address}'"
-    "'${_port}'"
-    "'${_password}'"
-    # "\"$(echo \
-    #       "${_password}" | \
-    #       sed \
-    #         "s/'/\\\'/g")\""
-    "'${_opts[*]}'"
-    "'L6'" # Compression
-    "'L5'" # Quality
-    "'C24bit'" # Colors
-    0
-    "''"
-    NULL
-    NULL
-    1
-    1
-    1
-    0
-    1
-    0
-    0
-    "''"
-    NULL
-    0
-    NULL
-    NULL
-    NULL
-    NULL
-    NULL
-    NULL
-  )
-  _flush_table \
-    "${_db}" \
-    "${_table}"
-  _db_cmd=(
-    "INSERT"
-     "INTO"
-     "CONNECTION_BEAN"
-     "VALUES($( \
-       IFS=","; \
-       echo \
-         "${_entry[*]}"));"
-  )
-  _cmd=(
-    sqlite3
-      "${_db}"
-      "\"${_db_cmd[*]}\""
-  )
-  _msg_info \
-    "running ${_cmd[*]}"
-  su \
-    -c \
-    "${_cmd[*]}" || \
-    true
-  _account="$( \
-    _db_dump | \
-      grep \
-        "'${_profile}'")" || \
-  true
-  _msg_info \
-    "Account: ${_account}"
-}
-
-_db_dump(){
-  local \
-    _cmd=()
-  _cmd=(
-    sqlite3
-      "${_db}"
-      ".dump"
-  )
-  su \
-    -c \
-    "${_cmd[*]}"
-}
-
-# Set key for a profile
-_profile_key_value_set() {
-  local \
-    _profile="${1}" \
-    _key="${2}" \
-    _value="${3}" \
-    _table="CONNECTION_BEAN" \
-    _db_cmd="" \
-    _cmd=() \
-    _account \
-    _repl \
-    _id
-  _msg_info \
-    "Setting value ${_value} for key ${_key} of profile '${_profile}'"
-  _repl="${_value}"
-  _account="$( \
-    _db_dump | \
-      grep \
-        "'${_profile}'")" || \
-    true
-  if [[ "${_account}" != "" ]]; then
-    _msg_info \
-      "found account"
-    _pattern="$( \
-      _profile_key_value_get \
-        "${_profile}" \
-        "${_key}")"
-    _id="$( \
-      _profile_key_value_get \
-        "${_profile}" \
-        "id")"
-    _msg_info \
-      "account id ${_id}"
-    if [[ "${_key}" == "password" ]]; then
-      _repl="'${_value}'"
-    fi
-    if [[ "${_pattern}" != "" ]]; then
-      # _new_id="$((_id + 100))"
-      _new_id="$((1))"
-      _db_cmd="$( \
-        echo \
-          "${_account}" | \
-          sed \
-            "s/${_pattern}/${_repl}/" | \
-            sed \
-              "s/${_id},/${_new_id},/")"
-    fi
-  elif [[ "${_account}" == "" ]]; then
-    _msg_error \
-      "No account found in db"
-  fi
-  if [[ "${_db_cmd}" != "" ]]; then
-    _flush_table \
-      "${_db}" \
-      "${_table}"
-    _cmd=(
-      sqlite3
-        "${_db}"
-        "\"${_db_cmd}\""
-    )
-    _msg_info \
-      "Running ${_cmd[*]}"
-    su \
-      -c \
-      "${_cmd[*]}"
-  fi
-  _account="$( \
-    _db_dump | \
-      grep \
-        "'${_profile}'")" || \
-    true
-  _msg_info \
-    "Account: ${_account}"
-}
-
-_flush_table() {
-  local \
-    _db="${1}" \
-    _table="${2}" \
-    _delete \
-    _delete_1 \
-    _delete_2
-  _msg_info \
-    "flushing table ${_table} in db '${_db}'"
-  _delete_1="Delete from ${_table};"
-  _delete_2="DELETE FROM SQLITE_SEQUENCE WHERE name='${_table}';"
-  _delete="DELETE FROM ${_table};"
-  _cmd=(
-    sqlite3
-      "${_db}"
-      "'${_delete}'"
-  )
-  su \
-    -c \
-    "${_cmd[*]}"
-}
-
-_account_key() {
-  local \
-    _account="${1}" \
-    _position="${2}" 
-  echo \
-    "${_account}" | \
-    awk \
-      -F \
-        "(" \
-      '{print $2}' | \
-      awk \
-        -F \
-          "," \
-        '{print $'"${_position}"'}'
-}
-
-# Get MultiVNC settings key
-# $1: target settings key
-_profile_key_value_get() {
-  local \
-    _profile="${1}" \
-    _key="${2}" \
-    _msg=() \
-    _account
-  _account="$( \
-    _db_dump | \
-      grep \
-        "'${_profile}'")"
-  if [[ "${_key}" == "id" ]]; then
-    _position=1
-  elif [[ "${_key}" == "host" ]]; then
-    _position=3
-  elif [[ "${_key}" == "port" ]]; then
-    _position=4
-  elif [[ "${_key}" == "password" ]]; then
-    _position=5
-  fi
-  _account_key \
-    "${_account}" \
-    "${_position}"
-}
-
 _set_overrides() {
   _set_override \
     "target" \
-    "address" \
-    "localhost"
+    "network" \
+    "mainnet"
   _set_override \
-    "target" \
-    "port" \
-    "59001"
+    "call" \
+    "type" \
+    "static"
   _set_override \
-    "target" \
-    "password" \
+    "contract" \
+    "abi" \
+    ""
+  _set_override \
+    "etherscan" \
+    "key" \
     ""
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -450,28 +125,22 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
-Get or set MultiVNC settings
+Run a smart contract function 
 usage:
   $(_get "app" "name")
     [options]
-    <command>
-    <profile>
-    <key>
-    (<value>)
-  commands:
-     add                  Set new profile
-       <profile>
-     get                  Get configuration value
-       <key>
-     set                  Set configuration value
-       <key>
-       <value>
-     backup               Backup original database
-     restore              Restore original database
+    <address>
+    <method>
   options:
-     -a <address>         Address for the new profile.
-     -p <port>            Port for the new profile.
-     -k <password>        Password for the new profile.
+     -a <address>         Contract address.
+     -A <abi>             Contract ABI.
+                          Default: $(_get "contract" "abi")
+     -n <network>         EVM network name.
+                          Default: $(_get "target" "network")
+     -t <call_type>       Static or dynamic.
+                          Default: $(_get "call" "type")
+     -k <etherscan_key>   Etherscan key.
+                          Default: $(_get "etherscan" "key")
      -h                   This message.
      -c                   Enable color output
      -v                   Enable verbose output
@@ -499,21 +168,21 @@ _display_flags() {
 # Shows configuration options.
 _show_config() {
   local \
-    _get_date
+    _call_date
   TZ=UTC \
-    printf \
-      -v _get_date \
-      '%(%FT%R%z)T' \
-      "${SOURCE_DATE_EPOCH}"
+  printf \
+    -v \
+      _call_date \
+    '%(%FT%R%z)T' \
+    "${SOURCE_DATE_EPOCH}"
   _msg_info "${app_name} configuration"
-  _msg_info "           Operation date:   $(_get "_get" "date")"
-  _msg_info "           Target command:   $(_get "target" "command")"
-  _msg_info "           Target profile:   $(_get "target" "profile")"
-  _msg_info "           Target address:   $(_get "target" "address")"
-  _msg_info "              Target port:   $(_get "target" "port")"
-  _msg_info "          Target password:   $(_get "target" "password")"
-  _msg_info "               Target key:   $(_get "target" "key")"
-  _msg_info "             Target value:   $(_get "target" "value")"
+  _msg_info "                Call date:   $(_get "_call" "date")"
+  _msg_info "          Contract method:   $(_get "contract" "method")"
+  _msg_info "         Contract address:   $(_get "contract" "address")"
+  _msg_info "             Contract ABI:   $(_get "contract" "abi")"
+  _msg_info "           Target network:   $(_get "target" "network")"
+  _msg_info "                Call type:   $(_get "call" "type")"
+  _msg_info "            Etherscan key:   $(_get "etherscan" "key")"
 }
 
 _globals
@@ -526,13 +195,15 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
-    'a:p:k:cvh?' \
+    'a:a:n:t:k:cvh?' \
     arg; do
   case \
     "${arg}" in
-    a) override_target_address="${OPTARG}" ;;
-    p) override_target_port="${OPTARG}" ;;
-    k) override_target_password="${OPTARG}" ;;
+    a) override_contract_address="${OPTARG}" ;;
+    A) override_contract_abi="${OPTARG}" ;;
+    n) override_target_network="${OPTARG}" ;;
+    n) override_call_type="${OPTARG}" ;;
+    k) override_etherscan_key="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
     h|?) _set_overrides && \
@@ -553,33 +224,29 @@ shift \
   ))
 if (( $# < 1 )); then
   _msg_error \
-    "no command given" \
+    "no address given" \
+    0
+  _set_overrides
+  _usage \
+    1
+if (( $# < 2 )); then
+  _msg_error \
+    "no method given" \
     0
   _set_overrides
   _usage \
     1
 fi
+fi
 _set \
-  "target" \
-  "command" \
+  "contract" \
+  "address" \
   "${1}"
 if (( 1 < $# )); then
   _set \
-    "target" \
-    "profile" \
+    "contract" \
+    "method" \
     "${2}"
-fi
-if (( 2 < $# )); then
-  _set \
-    "target" \
-    "key" \
-    "${3}"
-fi
-if (( 3 < $# )); then
-  _set \
-    "target" \
-    "value" \
-    "${4}"
 fi
 _set_overrides
 _config_user_init \
@@ -591,6 +258,10 @@ _show_config
 app_opts=(
   "$( \
     _get \
+      "call" \
+      "type")"
+  "$( \
+    _get \
       "contract" \
       "address")"
   "$( \
@@ -599,12 +270,16 @@ app_opts=(
       "method")"
   "$( \
     _get \
+      "contract" \
+      "abi")"
+  "$( \
+    _get \
       "target" \
       "network")"
   "$( \
     _get \
-      "targe" \
-      "network")"
+      "etherscan" \
+      "key")"
 )
 
 _contract_call \

@@ -591,12 +591,8 @@ _set_overrides() {
     "type" \
     "static"
   _api_key_auto_detect \
-    "$(_get \
-         "target" \
-         "network")"
-  if [[ "$(_get \
-             "contract" \
-             "address")" != "" ]]; then
+    "${target_network}"
+  if [[ "${contract_address}" != "" ]]; then
     _set_override \
       "contract" \
       "abi" \
@@ -616,30 +612,22 @@ _set_overrides() {
     "wallet" \
     "address" \
     "$(_wallet_address_get \
-         "$(_get \
-              "wallet" \
-              "name")")"
+         "${wallet_name}")"
   _set_override \
     "wallet" \
     "path" \
     "$(_wallet_path_get \
-         "$(_get \
-              "wallet" \
-              "name")")"
+         "${wallet_name}")"
   _set_override \
     "wallet" \
     "seed" \
     "$(_wallet_seed_get \
-         "$(_get \
-              "wallet" \
-              "name")")"
+         "${wallet_name}")"
   _set_override \
     "wallet" \
     "password" \
     "$(_wallet_password_get \
-         "$(_get \
-              "wallet" \
-              "name")")"
+         "${wallet_name}")"
   _set_override \
     "measure" \
     "unit" \
@@ -664,7 +652,7 @@ _usage() {
 Run a smart contract function 
 
 Usage:
-  $(_get "app" "name")
+  ${app_name}
     [options]
     <contract_address>
     <contract_method>
@@ -733,7 +721,7 @@ _display_array() {
   for _item \
     in "${_array[@]}"; do
   _msg_info \
-    "                            ${_item}"
+    "                             ${_item}"
   done
 }
 
@@ -819,16 +807,10 @@ if (( $# < 2 )); then
     1
 fi
 if (( 0 < $# )); then
-  _set \
-    "contract" \
-    "address" \
-    "${1}"
+  contract_address="${1}"
 fi
 if (( 1 < $# )); then
-  _set \
-    "contract" \
-    "method" \
-    "${2}"
+  contract_method="${2}"
 fi
 shift \
   2

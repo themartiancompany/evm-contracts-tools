@@ -493,18 +493,9 @@ _default_artifact_path_get() {
     _artifact \
     _data_dir \
     _network
-  _network="$( \
-    _get \
-      "target" \
-      "network")"
-  _address="$( \
-    _get \
-      "contract" \
-      "address")"
-  _app="$( \
-    _get \
-      "app" \
-      "name")"
+  _network="${target_network}"
+  _address="${contract_address}"
+  _app="${app_name}"
   _data_dir="${HOME}/.local/share/${_app}"
   if [[ "${_type}" == "abi" ]]; then
     _artifact="${_data_dir}/${_network}/${_address}.abi.json"
@@ -561,7 +552,7 @@ _set_overrides() {
   elif [[ -z "${color}" ]]; then
     color="n"
   fi
-  _data_dir="${HOME}/.local/share/$(_get "app" "name")"
+  _data_dir="${HOME}/.local/share/${app_name}"
   _set_override \
     "call" \
     "date" \

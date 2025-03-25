@@ -330,6 +330,9 @@ async function
     _retries_max =
       100;
   }
+  _retries_max =
+    Number(
+      _retries_max);
   if ( _call_timeout == "" ) {
     _msg_info(
       "Setting timeout to '300' seconds.");
@@ -345,6 +348,9 @@ async function
     _msg_value =
       0;
   }
+  _msg_value =
+    Number(
+      _msg_value);
   if ( _measure_unit == "" ) {
     _msg_info(
       "Setting measure unit to 'ether'.");

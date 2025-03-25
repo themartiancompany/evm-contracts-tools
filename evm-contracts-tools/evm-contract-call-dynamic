@@ -336,11 +336,9 @@ async function
     _call_timeout =
       300;
   }
-  else {
-    _call_timeout =
-      Number(
-        _call_timeout);
-  }
+  _call_timeout =
+    Number(
+      _call_timeout);
   if ( _msg_value == "" ) {
     _msg_info(
       "Setting transaction value '0'.");

@@ -400,12 +400,7 @@ async function
       if ( _tx == undefined ) {
         _msg_error_transaction_undefined(
           _attempt);
-        _msg_info(
-          "Waiting 3 seconds before retrying.");
-        await _delay(
-          3000);
-        _attempt =
-          _attempt + 1;
+	throw "Transaction undefined."
       }
       else if ( _tx != undefined ) {
         console.log(
@@ -418,25 +413,12 @@ async function
         else if ( _tx.hash == undefined ) {
         _msg_error_transaction_failed(
           _attempt);
-        _msg_info(
-          "Waiting 3 seconds before retrying.");
-        await _delay(
-          3000);
-          _attempt =
-            _attempt + 1;
+        throw "Transaction hash undefined."
         }
         else {
         _msg_error_transaction_failed(
           _attempt);
-        _msg_error(
-          "Unknown transaction error.",
-          0);
-        _msg_info(
-          "Waiting 3 seconds before retrying.");
-        await _delay(
-          3000);
-          _attempt =
-            _attempt + 1;
+        throw "Unknown transaction error."
         }
       }
     } catch (e) {

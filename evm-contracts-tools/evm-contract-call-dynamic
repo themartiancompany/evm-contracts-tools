@@ -59,6 +59,8 @@ function
     "evm-contract-call-dynamic";
   retries_max =
     "";
+  call_timeout =
+    "";
   wallet_seed =
     "";
   wallet_password =
@@ -213,6 +215,7 @@ function
 
 async function
   _contract_call_dynamic(
+    _call_timeout,
     _wallet_seed,
     _wallet_password,
     _api_key_path,
@@ -233,6 +236,17 @@ async function
     _send_opts,
     _receipt,
     _tx;
+  if ( _call_timeout == "" ) {
+    _msg_info(
+      "Setting timeout to '300' seconds.");
+    _call_timeout =
+      300;
+  }
+  else {
+    _call_timeout =
+      Number(
+        _call_timeout);
+  }
   _contract_get_opts = [
     _wallet_seed,
     _wallet_password,
@@ -278,7 +292,7 @@ async function
     _receipt =
       await _tx.wait(
         1,
-        3840000);
+        _call_timeout);
   } catch (error) {
     _msg_info(
       "Dynamic contract call crashed.");
@@ -292,6 +306,7 @@ async function
 async function
   _contract_run(
     _retries_max,
+    _call_timeout,
     _wallet_seed,
     _wallet_password,
     _api_key_path,
@@ -310,24 +325,37 @@ async function
     _wallet_path_list,
     _wallet_path;
   if ( _retries_max == "" ) {
+    _msg_info(
+      "Setting maximum call retries to '100'.");
     _retries_max =
       100;
   }
+  if ( _call_timeout == "" ) {
+    _msg_info(
+      "Setting timeout to '300' seconds.");
+    _call_timeout =
+      300;
+  }
+  else {
+    _call_timeout =
+      Number(
+        _call_timeout);
+  }
   if ( _msg_value == "" ) {
     _msg_info(
-      "setting transaction value '0'");
+      "Setting transaction value '0'.");
     _msg_value =
       0;
   }
   if ( _measure_unit == "" ) {
     _msg_info(
-      "setting measure unit to 'ether'");
+      "Setting measure unit to 'ether'.");
     _measure_unit =
       "ether";
   }
   if ( _wallet_password == "" ) {
     _msg_info(
-      "wallet without password");
+      "Wallet without password.");
   }
   _wallet_path =
     "";
@@ -343,6 +371,7 @@ async function
         _wallet_path);
   }
   _contract_call_dynamic_opts = [
+    _call_timeout,
     _wallet_seed,
     _wallet_password,
     _api_key_path,
@@ -367,7 +396,7 @@ async function
       if ( _tx == undefined ) {
         _msg_error_transaction_undefined(
           _attempt);
-        console.log(
+        _msg_info(
           "Waiting 3 seconds before retrying.");
         await _delay(
           3000);
@@ -425,6 +454,14 @@ async function
 
 function
   _overrides_set() {
+  if ( retries_max == "" ) {
+    retries_max =
+      100;
+  }
+  if ( call_timeout == "" ) {
+    call_timeout =
+      300;
+  }
   if ( msg_value == "" ) {
     msg_value =
       0;
@@ -447,6 +484,7 @@ function
     "  evm-contract-call-dynamic",
     "    <quiet>",
     "    <retries_max>",
+    "    <call_timeout>",
     "    <wallet_seed>",
     "    <wallet_password>",
     "    <api_key_path>",
@@ -465,6 +503,8 @@ function
     "                                   Default: y",
     "  <retries_max>                    Maximum number of retries before",
     "                                   failing.",
+    "  <call_timeout>                   How much seconds to wait for a return",
+    "                                   before declaring the call failed.",
     "  <wallet_seed>                    Path of the file containing",
     "                                   the seed phrase.",
     "  <wallet_password>                Password of the wallet.",
@@ -516,6 +556,10 @@ function
     "             Max retries: {retries_max}".replace(
       "{retries_max}",
       retries_max));
+  _text.push(
+    "            Call timeout: {call_timeout}".replace(
+      "{call_timeout}",
+      call_timeout));
   _text.push(
     "             Wallet seed: {wallet_seed}".replace(
       "{wallet_seed}",
@@ -591,50 +635,54 @@ function
           _value;
       }
       if ( _index == 4 ) {
-        wallet_seed =
+        call_timeout =
           _value;
       }
       if ( _index == 5 ) {
-        wallet_password =
+        wallet_seed =
           _value;
       }
       if ( _index == 6 ) {
-        api_key_path =
+        wallet_password =
           _value;
       }
       if ( _index == 7 ) {
-        msg_value =
+        api_key_path =
           _value;
       }
       if ( _index == 8 ) {
-        measure_unit =
+        msg_value =
           _value;
       }
       if ( _index == 9 ) {
-        target_network =
+        measure_unit =
           _value;
       }
       if ( _index == 10 ) {
-        contract_address =
+        target_network =
           _value;
       }
       if ( _index == 11 ) {
-        contract_abi_path =
+        contract_address =
           _value;
       }
       if ( _index == 12 ) {
-        contract_bytecode_path =
+        contract_abi_path =
           _value;
       }
       if ( _index == 13 ) {
-        contract_compiler_output_path =
+        contract_bytecode_path =
           _value;
       }
       if ( _index == 14 ) {
+        contract_compiler_output_path =
+          _value;
+      }
+      if ( _index == 15 ) {
         contract_method =
           _value;
       }
-      if ( 14 < _index ) {
+      if ( 15 < _index ) {
         method_args.push(
 	  _value);
       }
@@ -662,6 +710,7 @@ if ( _cmdline_check(
   _overrides_set();
   app_opts = [
     retries_max,
+    call_timeout,
     wallet_seed,
     wallet_password,
     api_key_path,

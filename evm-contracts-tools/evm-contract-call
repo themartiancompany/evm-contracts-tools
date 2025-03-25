@@ -27,14 +27,23 @@ _bin="$( \
       command \
         -v \
 	  "env")")"
-_lib="${_bin}/../lib"
-source \
-  "${_lib}/libcrash-bash/crash-bash"
+_lib="$( \
+  realpath \
+    "${_bin}/../lib")"
+_crash_bash="${_lib}/libcrash-bash/crash-bash"
+_libevm="${_lib}/libevm/libevm"
+_sourced \
+  "${_crash_bash}" 2>/dev/null || \
+  source \
+    "${_crash_bash}"
+_sourced \
+  "${_libevm}"
 
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
   call_type=""
+  call_timeout=""
   wallet_name=""
   wallet_path=""
   wallet_password=""
@@ -87,67 +96,6 @@ _evm_contract_call_type() {
     "${_lib}/evm-contract-call-${_type}"
 }
 
-_network_setup() {
-  local \
-    _chain="${1}" \
-    _rpc_selection="${2}" \
-    _chain_name \
-    _chain_id \
-    _rpc \
-    _msg=()
-  _msg=(
-    "looking for info on EVM blockchain"
-    "'${_chain}'"
-  )
-  _msg_info \
-    "${_msg[*]}"
-  _chain_id="$( \
-    evm-chains-info \
-      -o \
-        "id" \
-      "${_chain}")"
-  if [[ "${_chain_id}" != "" ]]; then
-    _chain_name="$( \
-      evm-chains-info \
-        -o \
-          "name" \
-        "${_chain}" 2>/dev/null || \
-        true)"
-    _msg=(
-      "found blockchain '${_chain_name}'"
-      "with id '${_chain_id}',"
-      "selecting RPC address with"
-      "criterion '${_rpc_selection}'."
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _rpc="$( \
-      evm-chains-info \
-        -o \
-          "rpc" \
-        -s \
-          "${_rpc_selection}" \
-        "${_chain}")"
-  elif [[ "${_chain_id}" == "" ]]; then
-    _msg=(
-      "Found no known blockchain for input"
-      "'${_chain}', interpreting given input"
-      "as an rpc address for the selected"
-      "network."
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _rpc="${_chain}"
-  fi
-  _msg=(
-    "Selected RPC address"
-    "'${_rpc}'"
-  )
-  _msg_info \
-    "${_msg[*]}"
-  _network_backend="${_rpc}"
-}
-
 _artifact_missing_reset() {
   local \
     _type="${1}" \
@@ -184,10 +132,10 @@ _artifacts_check() {
   if [[ "${_contract_compiler_output_path}" == "" ]] && \
      [[ "${_contract_abi_path}" == "" ]]; then
     _msg=(
-      "to safely perform an EVM contract call"
+      "To safely perform an EVM contract call"
       "you have to provide either"
-      "the contract abi or"
-      "an hardhat compilation artifact"
+      "the contract ABI or"
+      "an Hardhat compilation artifact."
     )
     _msg_error \
       "${_msg[*]}" \
@@ -198,29 +146,30 @@ _artifacts_check() {
 _evm_contract_call() {
   local \
     _call_type="${1}" \
-    _wallet_name="${2}" \
-    _wallet_path="${3}" \
-    _wallet_password="${4}" \
-    _wallet_seed="${5}" \
-    _api_key_path="${6}" \
-    _msg_value="${7}" \
-    _measure_unit="${8}" \
-    _retries_max="${9}" \
-    _network="${10}" \
-    _rpc_selection="${11}" \
-    _contract_address="${12}" \
-    _contract_abi_path="${13}" \
-    _contract_bytecode_path="${14}" \
-    _contract_compiler_output_path="${15}" \
-    _contract_method="${16}" \
+    _call_timeout="${2}" \
+    _wallet_name="${3}" \
+    _wallet_path="${4}" \
+    _wallet_password="${5}" \
+    _wallet_seed="${6}" \
+    _api_key_path="${7}" \
+    _msg_value="${8}" \
+    _measure_unit="${9}" \
+    _retries_max="${10}" \
+    _network="${11}" \
+    _rpc_selection="${12}" \
+    _contract_address="${13}" \
+    _contract_abi_path="${14}" \
+    _contract_bytecode_path="${15}" \
+    _contract_compiler_output_path="${16}" \
+    _contract_method="${17}" \
     _node_run_opts=() \
     _method_args=() \
     _cmd \
     _args=() \
-    _network_backend \
+    _rpc_backend \
     _msg=()
   shift \
-    16
+    17
   _method_args+=(
     "$@"
   )
@@ -228,7 +177,7 @@ _evm_contract_call() {
     -r
       "${_retries_max}"
   )
-  _network_setup \
+  _rpc_backend_get \
     "${_network}" \
     "${_rpc_selection}"
   _cmd="$( \
@@ -241,7 +190,7 @@ _evm_contract_call() {
       "${_wallet_seed}"
       "${_retries_max}"
       "${_api_key_path}"
-      "${_network_backend}"
+      "${_rpc_backend}"
       "${_contract_abi_path}"
       "${_contract_bytecode_path}"
       "${_contract_compiler_output_path}"
@@ -253,12 +202,13 @@ _evm_contract_call() {
     _args+=(
       "${quiet}"
       "${_retries_max}"
+      "${_call_timeout}"
       "${_wallet_seed}"
       "${_wallet_password}"
       "${_api_key_path}"
       "${_msg_value}"
       "${_measure_unit}"
-      "${_network_backend}"
+      "${_rpc_backend}"
       "${_contract_address}"
       "${_contract_abi_path}"
       "${_contract_bytecode_path}"
@@ -268,8 +218,8 @@ _evm_contract_call() {
     )
   fi
   _msg=(
-    "calling evm-contract-call-${_call_type}"
-    "with arguments '${_args[*]}'"
+    "Calling evm-contract-call-${_call_type}"
+    "with arguments '${_args[*]}'."
   )
   _msg_info \
     "${_msg[*]}"
@@ -279,100 +229,18 @@ _evm_contract_call() {
     "${_args[@]}"
 }
 
-_wallet_path_get() {
-  local \
-    _wallet_name="${1}" \
-    _path \
-    _wallet_address
-  _wallet_address="$( \
-    evm-wallet \
-      get \
-        "${_wallet_name}" \
-        "address")"
-  _path="${HOME}/.config/evm-wallet/${_wallet_name}.dat"
-  echo \
-    "${_path}"
-}
-
-_wallet_password_get() {
-  local \
-    _wallet_name="${1}" \
-    _path
-  _path="${HOME}/.config/evm-wallet/${_wallet_name}-password.txt"
-  echo \
-    "${_path}"
-}
-
-_wallet_seed_get() {
-  local \
-    _wallet_name="${1}" \
-    _path
-  _path="${HOME}/.config/evm-wallet/${_wallet_name}-seed.txt"
-  echo \
-    "${_path}"
-}
-
-_wallet_address_get() {
-  local \
-    _wallet_name="${1}" \
-    _wallet_address
-  _wallet_address="$( \
-    evm-wallet \
-      get \
-        "${_wallet_name}" \
-        "address")"
-  echo \
-    "${_wallet_address}"
-}
-
-_api_key_auto_detect() {
-  local \
-    _chain="${1}" \
-    _chain_name \
-    _key \
-    _msg=()
-  _key="$( \
-    evm-chains-explorers \
-      -c \
-        "${_chain}" \
-      -s \
-        'kirsh' \
-      get \
-        keys)"
-  _chain_name="$( \
-    evm-chains-info \
-      -o \
-        "name" \
-      "${_chain}")"
-  if [[ ! -e "${_key}" ]]; then
-    _msg=(
-      "Found no provider services"
-      "keys for chain '${_chain_name}'."
-      "Check available service"
-      "providers with \"evm-chains-info"
-      "-o explorers '${_chain}'\""
-      "and add the relative api key in"
-      "'<user_home>/.config/evm-chains-explorers/<service>/default.txt'"
-    )
-    _msg_info \
-      "${_msg[*]}"
-  fi
-  _set_override \
-    "api" \
-    "key" \
-    "${_key}"
-}
-
+# TODO: add contracts source index support when its ready
+#       and move to libEVM.
 _contract_abi_retrieve() {
   local \
     _evm_contracts_abi_get_opts=() \
     _msg=() \
     _data_dir
   _msg=(
-    "no contract ABI or compiler output"
+    "No contract ABI or compiler output"
     "available, attempting to obtain it from"
     "a network's contracts ABI provider"
-    "at path '${_abi_target}'"
+    "at path '${_abi_target}'."
   )
   _msg_info \
     "${_msg[*]}"
@@ -400,7 +268,7 @@ _contract_abi_retrieve() {
   )
   if [ ! -e "${_key}" ]; then
     _msg=(
-      "contract ABI provider API"
+      "Contract ABI provider API"
       "key '${_key}' not found,"
       "fetch the ABI from the"
       "provider may not work."
@@ -418,8 +286,8 @@ _contract_abi_retrieve() {
       "${_address}"
   if [ $? -eq 0 ]; then
     _msg=(
-      "obtained ABI from a network explorer,"
-      "setting contract ABI value to '${_abi_target}'"
+      "Obtained ABI from a network explorer,"
+      "setting contract ABI value to '${_abi_target}'."
     )
     _msg_info \
       "${_msg[*]}"
@@ -435,6 +303,7 @@ _contract_abi_retrieve() {
   fi
 }
 
+# This overrides the LibEVM one
 _contract_abi_auto_detect() {
   local \
     _abi \
@@ -490,6 +359,7 @@ _default_artifact_path_get() {
     "${_artifact}"
 }
 
+# This overrides the LibEVM one
 _contract_bytecode_auto_detect() {
   local \
     _bytecode
@@ -563,6 +433,18 @@ _set_overrides() {
     "call" \
     "type" \
     "static"
+  _set_override \
+    "call" \
+    "timeout" \
+    "300"
+  _set_override \
+    "measure" \
+    "unit" \
+    "ether"
+  _set_override \
+    "msg" \
+    "value" \
+    "0"
   _api_key_auto_detect \
     "${target_network}"
   if [[ "${contract_address}" != "" ]]; then
@@ -583,32 +465,27 @@ _set_overrides() {
   fi
   _set_override \
     "wallet" \
-    "address" \
-    "$(_wallet_address_get \
-         "${wallet_name}")"
-  _set_override \
-    "wallet" \
     "path" \
     "$(_wallet_path_get \
+         "evm-wallet" \
          "${wallet_name}")"
-  _set_override \
-    "wallet" \
+  _secret_auto_detect \
     "seed" \
-    "$(_wallet_seed_get \
-         "${wallet_name}")"
+    "seed" \
+    "evm-wallet" \
+    "${wallet_name}"
+  _secret_auto_detect \
+    "password" \
+    "plain" \
+    "evm-wallet" \
+    "${wallet_name}"
   _set_override \
     "wallet" \
-    "password" \
-    "$(_wallet_password_get \
-         "${wallet_name}")"
-  _set_override \
-    "measure" \
-    "unit" \
-    "ether"
-  _set_override \
-    "msg" \
-    "value" \
-    "0"
+    "address" \
+    "$(evm-wallet \
+         get \
+           "${wallet_name}" \
+           "address")"
 }
 
 # Show help usage, with an exit status.
@@ -730,7 +607,7 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'A:B:C:N:w:p:s:n:t:k:V:u:r:S:cvh?' \
+    'A:B:C:N:w:p:s:n:t:T:k:V:u:r:S:cvh?' \
     arg; do
   case \
     "${arg}" in
@@ -743,6 +620,7 @@ while \
     s) override_wallet_seed="${OPTARG}" ;;
     n) override_target_network="${OPTARG}" ;;
     t) override_call_type="${OPTARG}" ;;
+    T) override_call_timeout="${OPTARG}" ;;
     k) override_api_key="${OPTARG}" ;;
     V) override_msg_value="${OPTARG}" ;;
     u) override_measure_unit="${OPTARG}" ;;
@@ -794,6 +672,7 @@ _set_overrides
 _show_config
 app_opts=(
   "${call_type}"
+  "${call_timeout}"
   "${wallet_name}"
   "${wallet_path}"
   "${wallet_password}"

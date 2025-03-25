@@ -681,6 +681,9 @@ function
       }
   });
   if ( contract_address == "" ) {
+    _msg_error(
+      "No contract address specified.",
+      0);
     quiet =
       "n";
     _usage(

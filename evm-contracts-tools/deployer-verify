@@ -1,0 +1,390 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
+_msg_info =
+  _libcrash._msg_info;
+_msg_error =
+  _libcrash._msg_error;
+_printf =
+  _libcrash._printf;
+const
+  _deployer_get_module =
+    require(
+      './deployer-get');
+_deployer_get =
+  _deployer_get_module._deployer_get;
+
+function
+  _global_variables() {
+  app_name =
+    "deployer-verify";
+  wallet_seed =
+    "";
+  retries_max =
+    "";
+  api_key_path =
+    "";
+  chain_id =
+    "";
+  chain_name =
+    "";
+  target_network =
+    "";
+  contract_address =
+    "";
+  contract_deployer =
+    "";
+  transaction_deployment =
+    "";
+  quiet =
+    "";
+}
+
+function
+  _error_handle(
+    _error) {
+  let
+    _message;
+  if ( 'error' in _error && 
+       _error['error'] != undefined &&
+       'message' in _error['error'] ) {
+    _message =
+      _error['error']['message'];
+  }
+  else if ( 'shortMessage' in _error ) {
+    _message =
+      _error['shortMessage'];
+  }
+  else {
+    _message =
+      _error;
+  }
+  _msg_error(
+    _message,
+    0);
+}
+
+function
+  _delay(
+    _time) {
+  return new Promise(resolve => setTimeout(resolve, _time));
+}
+
+async function
+  _deployer_verify(
+    _wallet_seed,
+    _retries_max,
+    _api_key_path,
+    _chain_id,
+    _chain_name,
+    _target_network,
+    _contract_address,
+    _contract_deployer,
+    _transaction_deployment) {
+  let
+    _deployer_get_opts,
+    _deployer_real,
+    _is_deployer;
+  _deployer_get_opts = [
+    _wallet_seed,
+    _retries_max,
+    _api_key_path,
+    _chain_id,
+    _chain_name,
+    _target_network,
+    _contract_address,
+    _transaction_deployment
+  ];
+  _deployer_real =
+    await _deployer_get.apply(
+      null,
+      _deployer_get_opts);
+  if ( _deployer_real == undefined ) {
+    throw "Error obtaining the deployer from input data."
+  }
+  if ( _contract_deployer == _deployer_real ) {
+    _is_deployer =
+      true;
+  else if ( _contract_deployer != _deployer_real ) {
+    _is_deployer =
+      false;
+  return _is_deployer;
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _method_args,
+    _text;
+  _text =
+    [];
+  _text.push(
+    "deployer-get configuration:");
+  _text.push(
+    "             Wallet seed: {wallet_seed}".replace(
+      "{wallet_seed}",
+      wallet_seed));
+  _text.push(
+    "             Max retries: {retries_max}".replace(
+      "{retries_max}",
+      retries_max));
+  _text.push(
+    "            API Key path: {api_key_path}".replace(
+      "{api_key_path}",
+      api_key_path));
+  _text.push(
+    "                Chain ID: {chain_id}".replace(
+      "{chain_id}",
+      chain_id));
+  _text.push(
+    "              Chain Name: {chain_name}".replace(
+      "{chain_name}",
+      chain_name));
+  _text.push(
+    "          Target network: {target_network}".replace(
+      "{target_network}",
+      target_network));
+  _text.push(
+    "        Contract address: {contract_address}".replace(
+      "{contract_address}",
+      contract_address));
+  _text.push(
+    "       Contract deployer: {contract_deployer}".replace(
+      "{contract_deployer}",
+      contract_deployer));
+  _text.push(
+    "  Deployment transaction: {transaction_deployment}".replace(
+      "{transaction_deployment}",
+      transaction_deployment));
+  for (_line of _text)  { 
+    _msg_info(
+      _line);
+  }
+}
+
+function
+  _usage(
+    _exit) {
+  let
+    _line,
+    _text;
+  _text = [
+    "Given a deployment transaction hash",
+    "and a contract address, determines",
+    "if an input address is the",
+    "contract deployer.",
+    "",
+    "Usage:",
+    "  deployer-verify",
+    "    <quiet>",
+    "    <wallet_seed>",
+    "    <retries_max>",
+    "    <api_key_path>",
+    "    <chain_id>",
+    "    <chain_name>",
+    "    <target_network>",
+    "    <contract_address>",
+    "    <contract_deployer>",
+    "    <transaction_deployment>",
+    "",
+    "Args:",
+    "  <quiet>                          Can be 'y' or 'n'",
+    "                                   Default: y",
+    "  <wallet_seed>                    Path of the file containing",
+    "                                   the seed phrase.",
+    "  <retries_max>                    Maximum number of retries before",
+    "                                   failing.",
+    "  <api_key_path>                   Path of the API key for the",
+    "                                   contract ABI provider service",
+    "  <target_network>                 Network on which the contract",
+    "                                   resides.",
+    "  <contract_address>               Address of the contract.",
+    "  <contract_deployer>              Address of the supposed deployer.",
+    "  <transaction_deployment>         Contract deployment transaction.",
+    "",
+    "  Options:",
+    "    -h                             This help."
+  ];
+  for (_line of _text) {
+    _msg_info(
+      _line);
+  }
+  subprocess.exit(
+    _exit);
+}
+
+function
+  _overrides_set() {
+  if ( retries_max == "" ) {
+    retries_max =
+      10;
+  }
+}
+
+function
+  _cmdline_parse() {
+  quiet =
+    "y";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        quiet =
+          _value;
+      }
+      if ( _index == 3 ) {
+        wallet_seed =
+          _value;
+      }
+      if ( _index == 4 ) {
+        retries_max =
+          _value;
+      }
+      if ( _index == 5 ) {
+        api_key_path =
+          _value;
+      }
+      if ( _index == 6 ) {
+        chain_id =
+          _value;
+      }
+      if ( _index == 7 ) {
+        chain_name =
+          _value;
+      }
+      if ( _index == 8 ) {
+        target_network =
+          _value;
+      }
+      if ( _index == 9 ) {
+        contract_address =
+          _value;
+      }
+      if ( _index == 10 ) {
+        contract_deployer =
+          _value;
+      }
+      if ( _index == 11 ) {
+        transaction_deployment =
+          _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        _usage(
+          0);
+      }
+    }
+  );
+  if ( contract_address == "" ) {
+    _msg_error(
+      "No contract address specified.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+  if ( contract_deployer == "" ) {
+    _msg_error(
+      "No contract deployer specified.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+  if ( transaction_deployment == "" ) {
+    _msg_error(
+      "No deployement transaction specified.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+}
+
+async function
+  _deployer_verify_cmdline(
+    _app_opts) {
+  let
+    _is_deployer,
+    _msg;
+  try {
+    _is_deployer = 
+      await _deployer_verify.apply(
+        null,
+        _app_opts);
+    if ( _is_deployer != undefined ) {
+      _printf(
+        _is_deployer.toString());
+    }
+    else {
+      _msg =
+        "It has not been possile to discern from " +
+	"input data whether the candidate deployer " +
+	"is the contract actual deployer.";
+      throw _msg;
+    }
+  } catch (error) {
+    _msg_error(
+      error,
+      1);
+  }
+}
+
+if ( _cmdline_check(
+       "deployer-verify") ) {
+  _global_variables();
+  _cmdline_parse();
+  _overrides_set();
+  _config_show();
+  app_opts = [
+    wallet_seed,
+    retries_max,
+    api_key_path,
+    chain_id,
+    chain_name,
+    target_network,
+    contract_address,
+    contract_deployer,
+    transaction_deployment
+  ];
+  _deployer_verify_cmdline(
+    app_opts);
+}
+
+module.exports = {
+  _deployer_verify:
+    _deployer_verify
+};
+

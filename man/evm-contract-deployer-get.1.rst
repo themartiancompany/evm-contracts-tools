@@ -21,31 +21,29 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-=================
-evm-contract-call
-=================
+==========================
+evm-contract-deployer-get
+==========================
 
---------------------------------------------------------------
-Ethereum Virtual Machine-compatible Contract Caller
---------------------------------------------------------------
-:Version: evm-contract-call |version|
+----------------------------------------------------------------
+Ethereum Virtual Machine (EVM) contract deployer discover tool
+----------------------------------------------------------------
+:Version: evm-contract-deployer-get |version|
 :Manual section: 1
 
 Synopsis
 ========
 
-evm-contract-call *[options]* *address* *method* (*args*)
+evm-contract-deployer-get *[options]* *address* *transaction_deployment*
 
 Description
 ===========
 
-Runs smart contract functions as if they were
-normal programs.
+Determines the deployer of a smart contract
+given the deployment transaction.
 
-The caller uses the Ethers JavaScript library to
-communicate with blockchain networks and integrates
-natively with and depends on evm-wallet
-but it's also possible to directly provide seeds files.
+To obtain transaction data it uses libraries from
+EVM Transactions Tools.
 
 Networks
 =========
@@ -56,10 +54,8 @@ well as direct RPC addresses.
 Options
 =======
 
--A abi                  Contract ABI path.
--B bytecode             Contract bytecode path.
--C compiler_output      Contract compiler output
-                        path (the hardhat artifact).
+-a                      Whether to perform an authenticated
+                        RPC call.
 -N wallet_name          EVM wallet name.
 -w wallet_path          EVM wallet file path.
 -p wallet_path          EVM wallet password file.
@@ -69,13 +65,9 @@ Options
                         evm-chains-info as well as RPC addresses.
 -t call_type            Static (read-only) or dynamic (read/write).
 -k api_key              Etherscan-like service key.
--V msg_value            How much <measure_unit> attach to the
-                        transaction.
--u measure_unit         Measure unit for the transaction
-                        value. It can be 'ether' or 'wei'.
+-V deployer_verify      Whether to verify the input
+                        address is the deployer.
 -r retries_max          Maximum number of retries before
-                        declaring the call failed.
--T call_timeout         Maximum number of seconds before
                         declaring the call failed.
 -S rpc_selection        RPC selection method. It can be
                         'kirsh' or 'random'.
@@ -97,7 +89,7 @@ Copyright Pellegrino Prevete. AGPL-3.0.
 See also
 ========
 
-* evm-contract-deployer-get
+* evm-contract-call
 * evm-contract-deployment-address
 * evm-contract-deployments-dir
 * evm-contract-deployment-networks

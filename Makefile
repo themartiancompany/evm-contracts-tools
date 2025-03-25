@@ -26,6 +26,10 @@ BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
 LIB_DIR=$(DESTDIR)$(PREFIX)/lib
 
+_INSTALL_FILE=install -Dm644
+_INSTALL_DIR=install -dm755
+_INSTALL_EXE=install -Dm755
+
 DOC_FILES=\
   $(wildcard *.rst) \
   $(wildcard *.md)
@@ -42,26 +46,56 @@ install: install-scripts install-doc install-man
 
 install-scripts:
 
-	install -vDm 755 "$(_PROJECT)/evm-contract-call-dynamic" "$(LIB_DIR)/$(_PROJECT)/evm-contract-call-dynamic"
-	install -vDm 755 "$(_PROJECT)/evm-contract-call-static" "$(LIB_DIR)/$(_PROJECT)/evm-contract-call-static"
-	install -vDm 755 "$(_PROJECT)/contract-get" "$(LIB_DIR)/$(_PROJECT)/contract-get"
-	install -vDm 755 "$(_PROJECT)/evm-contract-deployment-address" "$(BIN_DIR)/evm-contract-deployment-address"
-	install -vDm 755 "$(_PROJECT)/evm-contract-deployment-networks" "$(BIN_DIR)/evm-contract-deployment-networks"
-	install -vDm 755 "$(_PROJECT)/evm-contract-deployment-versions" "$(BIN_DIR)/evm-contract-deployment-versions"
-	install -vDm 755 "$(_PROJECT)/evm-contract-deployments-dir" "$(BIN_DIR)/evm-contract-deployments-dir"
-	install -vDm 755 "$(_PROJECT)/evm-contract-call" "$(BIN_DIR)/evm-contract-call"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-call-dynamic" \
+	  "$(LIB_DIR)/$(_PROJECT)/evm-contract-call-dynamic"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-call-static" \
+	  "$(LIB_DIR)/$(_PROJECT)/evm-contract-call-static"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/contract-get" \
+	  "$(LIB_DIR)/$(_PROJECT)/contract-get"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/deployer-get" \
+	  "$(LIB_DIR)/$(_PROJECT)/deployer-get"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/deployer-verify" \
+	  "$(LIB_DIR)/$(_PROJECT)/deployer-verify"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-deployer-get" \
+	  "$(BIN_DIR)/evm-contract-deployer-get"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-deployment-address" \
+	  "$(BIN_DIR)/evm-contract-deployment-address"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-deployment-networks" \
+	  "$(BIN_DIR)/evm-contract-deployment-networks"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-deployment-versions" \
+	  "$(BIN_DIR)/evm-contract-deployment-versions"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-deployments-dir" \
+	  "$(BIN_DIR)/evm-contract-deployments-dir"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/evm-contract-call" \
+	  "$(BIN_DIR)/evm-contract-call"
 
 install-doc:
 
-	install -vDm 644 $(DOC_FILES) -t $(DOC_DIR)
+	$(_INSTALL_FILE) \
+	  $(DOC_FILES) \
+	  -t \
+	  "$(DOC_DIR)/"
 
 install-man:
 
-	install \
-	  -vdm755 \
+	$(_INSTALL_DIR) \
 	  "$(MAN_DIR)/man1"
 	rst2man \
 	  "man/evm-contract-call.1.rst" \
 	  "$(MAN_DIR)/man1/evm-contract-call.1"
+	rst2man \
+	  "man/evm-contract-deployer-get.1.rst" \
+	  "$(MAN_DIR)/man1/evm-contract-deployer-get.1"
 
 .PHONY: check install install-doc install-man install-scripts shellcheck

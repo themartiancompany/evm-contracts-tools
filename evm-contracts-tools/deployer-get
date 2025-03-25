@@ -1,0 +1,449 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
+_msg_info =
+  _libcrash._msg_info;
+_msg_error =
+  _libcrash._msg_error;
+_printf =
+  _libcrash._printf;
+const
+  { ethers } =
+    require(
+      "ethers");
+_ethers =
+  ethers;
+_wei_to_ether =
+  _ethers.formatEther;
+const
+  _transaction_get_module =
+    require(
+      '../evm-transaction-tools/transaction-get');
+_transaction_get =
+  _transaction_get_module._transaction_get;
+const
+  _transaction_recepit_get_module =
+    require(
+      '../evm-transaction-tools/transaction-receipt-get');
+_transaction_receipt_get =
+  _transaction_get_module._transaction_receipt_get;
+
+function
+  _global_variables() {
+  app_name =
+    "deployer-get";
+  wallet_seed =
+    "";
+  retries_max =
+    "";
+  api_key_path =
+    "";
+  chain_id =
+    "";
+  chain_name =
+    "";
+  target_network =
+    "";
+  contract_address =
+    "";
+  transaction_deployment =
+    "";
+  quiet =
+    "";
+}
+
+function
+  _error_handle(
+    _error) {
+  let
+    _message;
+  if ( 'error' in _error && 
+       _error['error'] != undefined &&
+       'message' in _error['error'] ) {
+    _message =
+      _error['error']['message'];
+  }
+  else if ( 'shortMessage' in _error ) {
+    _message =
+      _error['shortMessage'];
+  }
+  else {
+    _message =
+      _error;
+  }
+  _msg_error(
+    _message,
+    0);
+}
+
+function
+  _delay(
+    _time) {
+  return new Promise(resolve => setTimeout(resolve, _time));
+}
+
+async function
+  _deployer_get(
+    _wallet_seed,
+    _retries_max,
+    _api_key_path,
+    _chain_id,
+    _chain_name,
+    _target_network,
+    _contract_address,
+    _transaction_deployment) {
+  let
+    _attempt,
+    _candidate,
+    _deployer,
+    _passed,
+    _receipt,
+    _recipient,
+    _transaction_get_opts,
+    _transaction_receipt_get_opts;
+    _transaction_contract,
+    _tx,
+    _wallet_password;
+  _attempt =
+    1;
+  _wallet_password =
+    "";
+  _output_path =
+    "";
+  _transaction_get_opts = [
+    _retries_max,
+    _wallet_seed,
+    _wallet_password,
+    _chain_id,
+    _chain_name,
+    _target_network,
+    _api_key_path,
+    _output_path,
+    _transaction_deployment
+  ];
+  _transaction_receipt_get_opts = [
+    _retries_max,
+    _wallet_seed,
+    _wallet_password,
+    _chain_id,
+    _chain_name,
+    _target_network,
+    _api_key_path,
+    _output_path,
+    _transaction_deployment
+  ];
+  _passed = 
+    false;
+  while ( _attempt <= _retries_max &&
+          _passed == false ) {
+    try {
+      _tx =
+        await _transaction_get.apply(
+          null,
+          _transaction_get_opts);
+      if ( _tx == undefined ) {
+        throw "Undefined transaction."
+      }
+      else if ( _tx != undefined ) {
+        _candidate =
+          _tx.from;
+        _recipient =
+          _tx.to;
+      }
+      if ( _recipient != null ) {
+        throw "The transaction is not a deployment."
+      }
+      _receipt =
+        await _transaction_receipt_get.apply(
+          null,
+          _transaction_receipt_get_opts);
+      if ( _receipt == undefined ) {
+        throw "Undefined transaction receipt."
+      }
+      else if ( _receipt != undefined ) {
+        _transaction_contract =
+          _tx.contractAddress;
+      }
+      if ( _transaction_contract != _contract_address ) {
+        throw "The transaction does not deploy input contract."
+      }
+      _deployer =
+        _candidate;
+    } catch (_error) {
+      _error_handle(
+        _error);
+      // TODO: Do not break the loop
+      //       only on network errors.
+      console.log(typeof(_error));
+      _attempt =
+        _attempt + 1;
+      _msg_error(
+        "Increasing retry and waiting 3 seconds.",
+        0);
+      await _delay(
+        3000);
+    }
+  }
+  if ( _attempt > _retries_max ) {
+    throw "Maximum number of retries reached.";
+  }
+  return _deployer;
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _method_args,
+    _text;
+  _text =
+    [];
+  _text.push(
+    "deployer-get configuration:");
+  _text.push(
+    "             Wallet seed: {wallet_seed}".replace(
+      "{wallet_seed}",
+      wallet_seed));
+  _text.push(
+    "             Max retries: {retries_max}".replace(
+      "{retries_max}",
+      retries_max));
+  _text.push(
+    "            API Key path: {api_key_path}".replace(
+      "{api_key_path}",
+      api_key_path));
+  _text.push(
+    "                Chain ID: {chain_id}".replace(
+      "{chain_id}",
+      chain_id));
+  _text.push(
+    "              Chain Name: {chain_name}".replace(
+      "{chain_name}",
+      chain_name));
+  _text.push(
+    "          Target network: {target_network}".replace(
+      "{target_network}",
+      target_network));
+  _text.push(
+    "        Contract address: {contract_address}".replace(
+      "{contract_address}",
+      contract_address));
+  _text.push(
+    "  Deployment transaction: {transaction_deployment}".replace(
+      "{transaction_deployment}",
+      transaction_deployment));
+  for (_line of _text)  { 
+    _msg_info(
+      _line);
+  }
+}
+
+function
+  _usage(
+    _exit) {
+  let
+    _display_fun,
+    _line,
+    _text;
+  _text = [
+    "Returns the deployer address for a contract.",
+    "",
+    "Usage:",
+    "  deployer-get",
+    "    <quiet>",
+    "    <wallet_seed>",
+    "    <retries_max>",
+    "    <api_key_path>",
+    "    <chain_id>",
+    "    <chain_name>",
+    "    <target_network>",
+    "    <contract_address>",
+    "    <transaction_deployment>",
+    "",
+    "Args:",
+    "  <quiet>                          Can be 'y' or 'n'",
+    "                                   Default: y",
+    "  <wallet_seed>                    Path of the file containing",
+    "                                   the seed phrase.",
+    "  <retries_max>                    Maximum number of retries before",
+    "                                   failing.",
+    "  <api_key_path>                   Path of the API key for the",
+    "                                   contract ABI provider service",
+    "  <chain_id>                       Chain ID for the network.",
+    "  <chain_name>                     Name for the network.",
+    "  <target_network>                 Network on which the contract",
+    "                                   resides.",
+    "  <contract_address>               Address of the contract",
+    "  <transaction_deployment>         Contract deployment transaction.",
+    "",
+    "  Options:",
+    "    -h                             This help."
+  ];
+  for (_line of _text) {
+    _msg_info(
+      _line);
+  }
+  subprocess.exit(
+    _exit);
+}
+
+function
+  _overrides_set() {
+  if ( retries_max == "" ) {
+    retries_max =
+      10;
+  }
+}
+
+function
+  _cmdline_parse() {
+  quiet =
+    "y";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        quiet =
+          _value;
+      }
+      if ( _index == 3 ) {
+        wallet_seed =
+          _value;
+      }
+      if ( _index == 4 ) {
+        retries_max =
+          _value;
+      }
+      if ( _index == 5 ) {
+        api_key_path =
+          _value;
+      }
+      if ( _index == 6 ) {
+        chain_id =
+          _value;
+      }
+      if ( _index == 7 ) {
+        chain_name =
+          _value;
+      }
+      if ( _index == 8 ) {
+        target_network =
+          _value;
+      }
+      if ( _index == 9 ) {
+        contract_address =
+          _value;
+      }
+      if ( _index == 10 ) {
+        transaction_deployment =
+          _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
+    }
+  );
+  if ( contract_address == "" ) {
+    _msg_error(
+      "No contract address specified.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+  if ( transaction_deployment == "" ) {
+    _msg_error(
+      "No deployment transaction specified.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+}
+
+async function
+  _deployer_get_cmdline(
+    _app_opts) {
+  let
+    _deployer,
+    _msg;
+  try {
+    _deployer = 
+      await _deployer_get.apply(
+        null,
+        _app_opts);
+    if ( _deployer != undefined ) {
+      _printf(
+        _deployer.toString());
+    }
+    else {
+      _msg =
+        "It has not been possible to determine " +
+	"the deployer from the transaction.";
+      throw _msg;
+    }
+  } catch (error) {
+    _msg_error(
+      error,
+      1);
+  }
+}
+
+if ( _cmdline_check(
+       "deployer-get") ) {
+  _global_variables();
+  _cmdline_parse();
+  _overrides_set();
+  _config_show();
+  app_opts = [
+    wallet_seed,
+    retries_max,
+    api_key_path,
+    chain_id,
+    chain_name,
+    target_network,
+    contract_address,
+    transaction_deployment
+  ];
+  _deployer_get_cmdline(
+    app_opts);
+}
+
+module.exports = {
+  _deployer_get:
+    _deployer_get
+};

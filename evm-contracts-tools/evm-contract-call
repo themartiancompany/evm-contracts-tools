@@ -546,6 +546,9 @@ Usage:
      -r <retries_max>       Maximum number of retries before
                             declaring the call failed.
                             Default: ${retries_max}
+     -T <call_timeout>      Maximum number of seconds before
+                            declaring the call failed.
+                            Default: ${call_timeout}
      -S <rpc_selection>     RPC selection method. It can be
                             'kirsh' or 'random'.
                             Default: ${rpc_selection}
@@ -581,6 +584,7 @@ _show_config() {
   _msg_info "                Call date:   ${call_date}"
   _msg_info "                Call type:   ${call_type}"
   _msg_info "              Max retries:   ${retries_max}"
+  _msg_info "             Call timeout:   ${call_timeout}"
   _msg_info "              Wallet name:   ${wallet_name}"
   _msg_info "              Wallet path:   ${wallet_path}"
   _msg_info "          Wallet password:   ${wallet_password}"

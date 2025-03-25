@@ -77,6 +77,8 @@ Options
                         value. It can be 'ether' or 'wei'.
 -r retries_max          Maximum number of retries before
                         declaring the call failed.
+-T call_timeout         Maximum number of seconds before
+                        declaring the call failed.
 -S rpc_selection        RPC selection method. It can be
                         'kirsh' or 'random'.
 

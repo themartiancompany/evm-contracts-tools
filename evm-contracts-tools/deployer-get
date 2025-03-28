@@ -162,8 +162,6 @@ async function
     _output_path,
     _transaction_deployment
   ];
-  _passed = 
-    false;
   while ( _attempt <= _retries_max &&
           _passed == false ) {
     try {
@@ -215,8 +213,7 @@ async function
       }
       _deployer =
         _candidate;
-      _passed =
-        true;
+      break
     } catch (_error) {
       console.error(
         _error);

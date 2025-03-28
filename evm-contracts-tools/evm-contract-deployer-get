@@ -267,7 +267,9 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
-Run a smart contract function 
+
+Determines the deployer of a smart contract
+given the deployment transaction.
 
 Usage:
   ${app_name}

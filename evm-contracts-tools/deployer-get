@@ -83,19 +83,23 @@ function
     _error) {
   let
     _message;
-  if ( 'error' in _error && 
-       _error['error'] != undefined &&
-       'message' in _error['error'] ) {
-    _message =
-      _error['error']['message'];
-  }
-  else if ( 'shortMessage' in _error ) {
-    _message =
-      _error['shortMessage'];
+  if ( typeof(error) == "object" ) {
+    if ( 'error' in _error && 
+         _error['error'] != undefined &&
+         'message' in _error['error'] ) {
+      _message =
+        _error['error']['message'];
+    }
+    else if ( 'shortMessage' in _error ) {
+      _message =
+        _error['shortMessage'];
+    }
   }
   else {
     _message =
       _error;
+    console.error(
+      _error);
   }
   _msg_error(
     _message,
@@ -168,7 +172,9 @@ async function
           null,
           _transaction_get_opts);
       if ( _tx == undefined ) {
-        throw "Undefined transaction."
+        throw { "error": {
+                  "message":
+                    "Undefined transaction." } };
       }
       else if ( _tx != undefined ) {
         _candidate =
@@ -177,38 +183,47 @@ async function
           _tx.to;
       }
       if ( _recipient != null ) {
-        throw "The transaction is not a deployment."
+        throw { "error": {
+                  "message":
+                    "The transaction is not a deployment."} };
       }
       _receipt =
         await _transaction_receipt_get.apply(
           null,
           _transaction_receipt_get_opts);
       if ( _receipt == undefined ) {
-        throw {"error":
-                 "Undefined transaction receipt."};
+        throw { "error": {
+                  "message":
+                    "Undefined transaction receipt."}};
       }
       else if ( _receipt != undefined ) {
-        _transaction_contract =
+	_transaction_contract =
           _receipt.contractAddress;
       }
       if ( _transaction_contract != _contract_address ) {
+        console.error(
+          _receipt);
         console.error(
           "Contract address:",
           _contract_address);
         console.error(
           "Transaction contract:",
           _transaction_contract);
-        throw {"error":
-                 "The transaction does not deploy input contract."};
+        throw { "error": {
+                  "message":
+                    "The transaction does not deploy input contract."}};
       }
       _deployer =
         _candidate;
+      _passed =
+        true;
     } catch (_error) {
+      console.error(
+        _error);
       _error_handle(
         _error);
       // TODO: Do not break the loop
       //       only on network errors.
-      console.log(typeof(_error));
       _attempt =
         _attempt + 1;
       _msg_error(

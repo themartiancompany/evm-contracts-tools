@@ -44,7 +44,7 @@ _wei_to_ether =
 const
   _transaction_get_module =
     require(
-      '../evm-transaction-tools/transaction-get');
+      '../evm-transactions-tools/transaction-get');
 _transaction_get =
   _transaction_get_module._transaction_get;
 const

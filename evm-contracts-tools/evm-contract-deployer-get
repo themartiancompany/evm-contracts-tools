@@ -39,7 +39,6 @@ _sourced \
 _sourced \
   "${_libevm}"
 
-
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
@@ -168,275 +167,7 @@ _evm_contract_deployer_get() {
     "${_args[@]}"
 }
 
-_wallet_path_get() {
-  local \
-    _wallet_name="${1}" \
-    _path \
-    _wallet_address
-  _wallet_address="$( \
-    evm-wallet \
-      get \
-        "${_wallet_name}" \
-        "address")"
-  _path="${HOME}/.config/evm-wallet/${_wallet_name}.dat"
-  echo \
-    "${_path}"
-}
-
-_wallet_password_get() {
-  local \
-    _wallet_name="${1}" \
-    _path
-  _path="${HOME}/.config/evm-wallet/${_wallet_name}-password.txt"
-  echo \
-    "${_path}"
-}
-
-_wallet_seed_get() {
-  local \
-    _wallet_name="${1}" \
-    _path
-  _path="${HOME}/.config/evm-wallet/${_wallet_name}-seed.txt"
-  echo \
-    "${_path}"
-}
-
-_wallet_address_get() {
-  local \
-    _wallet_name="${1}" \
-    _wallet_address
-  _wallet_address="$( \
-    evm-wallet \
-      get \
-        "${_wallet_name}" \
-        "address")"
-  echo \
-    "${_wallet_address}"
-}
-
-_api_key_auto_detect() {
-  local \
-    _chain="${1}" \
-    _chain_name \
-    _key \
-    _msg=()
-  _key="$( \
-    evm-chains-explorers \
-      -c \
-        "${_chain}" \
-      -s \
-        'kirsh' \
-      get \
-        keys)"
-  _chain_name="$( \
-    evm-chains-info \
-      -o \
-        "name" \
-      "${_chain}")"
-  if [[ ! -e "${_key}" ]]; then
-    _msg=(
-      "Found no provider services"
-      "keys for chain '${_chain_name}'."
-      "Check available service"
-      "providers with \"evm-chains-info"
-      "-o explorers '${_chain}'\""
-      "and add the relative api key in"
-      "'<user_home>/.config/evm-chains-explorers/<service>/default.txt'"
-    )
-    _msg_info \
-      "${_msg[*]}"
-  fi
-  _set_override \
-    "api" \
-    "key" \
-    "${_key}"
-}
-
-_contract_abi_retrieve() {
-  local \
-    _evm_contracts_abi_get_opts=() \
-    _msg=() \
-    _data_dir
-  _msg=(
-    "no contract ABI or compiler output"
-    "available, attempting to obtain it from"
-    "a network's contracts ABI provider"
-    "at path '${_abi_target}'"
-  )
-  _msg_info \
-    "${_msg[*]}"
-  _data_dir="$( \
-    dirname \
-      "${_abi}")"
-  mkdir \
-    -p \
-    "${_data_dir}"
-  chmod \
-    700 \
-    "${_data_dir}"
-  if [[ "${quiet}" == "n" ]]; then
-    _evm_contracts_abi_get_opts+=(
-      --verbose
-    )
-  fi
-  _evm_contracts_abi_get_opts+=(
-    --network
-      "${_network}"
-    --key 
-      "${_key}"
-    --output-file
-      "${_abi_target}"
-  )
-  if [ ! -e "${_key}" ]; then
-    _msg=(
-      "contract ABI provider API"
-      "key '${_key}' not found,"
-      "fetch the ABI from the"
-      "provider may not work."
-    )
-    _msg_info \
-      "${_msg[*]}"
-  elif [ -e "${_key}" ]; then
-    _evm_contracts_abi_get_opts+=(
-      --key 
-        "${_key}"
-    )
-  fi
-  evm-contracts-abi-get \
-    "${_evm_contracts_abi_get_opts[@]}" \
-      "${_address}"
-  if [ $? -eq 0 ]; then
-    _msg=(
-      "obtained ABI from a network explorer,"
-      "setting contract ABI value to '${_abi_target}'"
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _abi="${_abi_target}"
-  else
-    _msg=(
-      "Couldn't obtain contract ABI"
-      "from the provider, blanking contract ABI value."
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _abi=""
-  fi
-}
-
-_contract_abi_auto_detect() {
-  local \
-    _abi \
-    _address \
-    _compiler_output \
-    _key \
-    _network
-  _network="$( \
-    _get \
-      "target" \
-      "network")"
-  _address="$( \
-    _get \
-      "contract" \
-      "address")"
-  _key="$( \
-    _get \
-      "api" \
-      "key")"
-  _abi="$( \
-    _get \
-      "contract" \
-      "abi")"
-  _compiler_output="$( \
-    _get \
-      "contract" \
-      "compiler_output")"
-  _abi_target="${_abi}"
-  if [[ "${_abi_target}" == "" ]]; then
-     _abi_target="$( \
-      _default_artifact_path_get \
-        "abi")"
-  fi
-  if [[ ! -e "${_abi}" ]] && \
-     [[ ! -e "${_compiler_output}" ]]; then
-    if [[ -e "${_abi_target}" ]]; then
-      _abi="${_abi_target}"
-    elif [[ ! -e "${_abi_target}" ]]; then
-      _contract_abi_retrieve
-    fi
-  fi
-  _set \
-    "contract" \
-    "abi" \
-    "${_abi}"
-}
-
-_default_artifact_path_get() {
-  local \
-    _type="${1}" \
-    _address \
-    _app \
-    _artifact \
-    _data_dir \
-    _network
-  _network="$( \
-    _get \
-      "target" \
-      "network")"
-  _address="$( \
-    _get \
-      "contract" \
-      "address")"
-  _app="$( \
-    _get \
-      "app" \
-      "name")"
-  _data_dir="${HOME}/.local/share/${_app}"
-  if [[ "${_type}" == "abi" ]]; then
-    _artifact="${_data_dir}/${_network}/${_address}.abi.json"
-  elif [[ "${_type}" == "bytecode" ]]; then
-    _artifact="${_data_dir}/${_network}/${_address}.bin"
-  elif [[ "${_type}" == "compiler_output" ]]; then
-    _artifact="${_data_dir}/${_network}/${_address}.json"
-  fi
-  echo \
-    "${_artifact}"
-}
-
-_contract_bytecode_auto_detect() {
-  local \
-    _bytecode
-  _bytecode="$( \
-    _default_artifact_path_get \
-      "bytecode")"
-  if [[ ! -e "${_bytecode}" ]]; then
-    _bytecode=""
-  fi
-  _set_override \
-    "contract" \
-    "bytecode"
-    "${_bytecode}"
-}
-
-_artifact_local_auto_detect() {
-  local \
-    _type="${1}" \
-    _artifact
-  _artifact="$( \
-    _default_artifact_path_get \
-      "${_type}")"
-  _set_override \
-    "contract" \
-    "${_type}" \
-    "${_artifact}"
-}
-
 _set_overrides() {
-  local \
-    _abi \
-    _bytecode \
-    _compiler_output \
-    _data_dir
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
@@ -447,12 +178,11 @@ _set_overrides() {
   elif [[ -z "${color}" ]]; then
     color="n"
   fi
-  _data_dir="${HOME}/.local/share/$(_get "app" "name")"
   _set_override \
     "call" \
     "date" \
     "$(_get_date_human)"
-  _set_overrides \
+  _set_override \
     "call" \
     "auth" \
     "n"
@@ -648,8 +378,9 @@ while \
          _usage \
            0 ;;
     *) _msg_error \
-         "Invalid argument '${arg}'" \
+         "Invalid argument '${arg}'." \
          0 && \
+       _set_overrides && \
        _usage \
          1 ;;
   esac

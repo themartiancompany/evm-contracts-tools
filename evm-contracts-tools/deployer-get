@@ -126,7 +126,6 @@ async function
     _attempt,
     _candidate,
     _deployer,
-    _passed,
     _receipt,
     _recipient,
     _transaction_get_opts,
@@ -162,8 +161,7 @@ async function
     _output_path,
     _transaction_deployment
   ];
-  while ( _attempt <= _retries_max &&
-          _passed == false ) {
+  while ( _attempt <= _retries_max ) {
     try {
       _tx =
         await _transaction_get.apply(

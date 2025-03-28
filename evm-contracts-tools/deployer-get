@@ -126,7 +126,7 @@ async function
     _receipt,
     _recipient,
     _transaction_get_opts,
-    _transaction_receipt_get_opts;
+    _transaction_receipt_get_opts,
     _transaction_contract,
     _tx,
     _wallet_password;

@@ -52,7 +52,7 @@ const
     require(
       '../evm-transactions-tools/transaction-receipt-get');
 _transaction_receipt_get =
-  _transaction_get_module._transaction_receipt_get;
+  _transaction_receipt_get_module._transaction_receipt_get;
 
 function
   _global_variables() {

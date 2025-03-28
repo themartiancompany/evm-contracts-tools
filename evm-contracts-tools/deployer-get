@@ -184,14 +184,22 @@ async function
           null,
           _transaction_receipt_get_opts);
       if ( _receipt == undefined ) {
-        throw "Undefined transaction receipt."
+        throw {"error":
+                 "Undefined transaction receipt."};
       }
       else if ( _receipt != undefined ) {
         _transaction_contract =
-          _tx.contractAddress;
+          _receipt.contractAddress;
       }
       if ( _transaction_contract != _contract_address ) {
-        throw "The transaction does not deploy input contract."
+        console.error(
+          "Contract address:",
+          _contract_address);
+        console.error(
+          "Transaction contract:",
+          _transaction_contract);
+        throw {"error":
+                 "The transaction does not deploy input contract."};
       }
       _deployer =
         _candidate;

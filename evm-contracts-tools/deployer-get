@@ -50,7 +50,7 @@ _transaction_get =
 const
   _transaction_recepit_get_module =
     require(
-      '../evm-transaction-tools/transaction-receipt-get');
+      '../evm-transactions-tools/transaction-receipt-get');
 _transaction_receipt_get =
   _transaction_get_module._transaction_receipt_get;
 

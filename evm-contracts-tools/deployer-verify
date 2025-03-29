@@ -67,30 +67,6 @@ function
 }
 
 function
-  _error_handle(
-    _error) {
-  let
-    _message;
-  if ( 'error' in _error && 
-       _error['error'] != undefined &&
-       'message' in _error['error'] ) {
-    _message =
-      _error['error']['message'];
-  }
-  else if ( 'shortMessage' in _error ) {
-    _message =
-      _error['shortMessage'];
-  }
-  else {
-    _message =
-      _error;
-  }
-  _msg_error(
-    _message,
-    0);
-}
-
-function
   _delay(
     _time) {
   return new Promise(resolve => setTimeout(resolve, _time));

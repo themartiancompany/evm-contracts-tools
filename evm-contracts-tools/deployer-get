@@ -27,6 +27,8 @@ const
       '../libcrash-js/crash-js');
 _cmdline_check =
   _libcrash._cmdline_check;
+_error_display =
+  _libcrash._error_display;
 _msg_info =
   _libcrash._msg_info;
 _msg_error =
@@ -76,34 +78,6 @@ function
     "";
   quiet =
     "";
-}
-
-function
-  _error_handle(
-    _error) {
-  let
-    _message;
-  if ( typeof(error) == "object" ) {
-    if ( 'error' in _error && 
-         _error['error'] != undefined &&
-         'message' in _error['error'] ) {
-      _message =
-        _error['error']['message'];
-    }
-    else if ( 'shortMessage' in _error ) {
-      _message =
-        _error['shortMessage'];
-    }
-  }
-  else {
-    _message =
-      _error;
-    console.error(
-      _error);
-  }
-  _msg_error(
-    _message,
-    0);
 }
 
 function
@@ -212,10 +186,9 @@ async function
       _deployer =
         _candidate;
       break
-    } catch (_error) {
-      console.error(
-        _error);
-      _error_handle(
+    } catch (
+        _error) {
+      _error_display(
         _error);
       // TODO: Do not break the loop
       //       only on network errors.
@@ -434,9 +407,10 @@ async function
 	"the deployer from the transaction.";
       throw _msg;
     }
-  } catch (error) {
+  } catch (
+      _error) {
     _msg_error(
-      error,
+      _error,
       1);
   }
 }

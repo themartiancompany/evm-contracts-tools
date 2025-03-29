@@ -463,7 +463,7 @@ function
     "                                   Default: y",
     "  <retries_max>                    Maximum number of retries before",
     "                                   failing.",
-    "  <call_timeout>                   How much seconds to wait for a return",
+    "  <call_timeout>                   How much milliseconds to wait for a return",
     "                                   before declaring the call failed.",
     "  <wallet_seed>                    Path of the file containing",
     "                                   the seed phrase.",

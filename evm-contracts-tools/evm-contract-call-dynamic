@@ -29,6 +29,8 @@ _cmdline_check =
   _libcrash._cmdline_check;
 _dirname =
   _libcrash._dirname;
+_error_display =
+  _libcrash._error_display;
 _msg_info =
   _libcrash._msg_info;
 _msg_error =
@@ -174,39 +176,6 @@ function
   return new Promise(resolve => setTimeout(resolve, _time));
 }
 
-function
-  _error_handle(
-    _error) {
-  let
-    _message;
-  if ( typeof(error) == "object" ) {
-    if ( 'error' in _error && 
-         _error['error'] != undefined &&
-         'message' in _error['error'] ) {
-      _message =
-        _error['error']['message'];
-    }
-    else if ( 'shortMessage' in _error ) {
-      _message =
-        _error['shortMessage'];
-    }
-    else {
-      _message =
-        _error;
-    }
-    console.error(
-      _error);
-  }
-  else {
-    _message =
-      _error;
-    console.error(
-      _error);
-  }
-  _msg_error(
-    _message,
-    0);
-}
 
 function
   _ethers_to_wei(
@@ -296,10 +265,11 @@ async function
       await _tx.wait(
         1,
         _call_timeout);
-  } catch (error) {
+  } catch (
+      _error) {
     _msg_info(
       "Dynamic contract call crashed.");
-    _error_handle(
+    _error_display(
       error)
     throw error;
   };
@@ -424,9 +394,10 @@ async function
         throw "Unknown transaction error."
         }
       }
-    } catch (e) {
-      _error_handle(
-        e);
+    } catch (
+        _error) {
+      _error_display(
+        _error);
       _msg_info(
         "Waiting 3 seconds before retrying.");
       await _delay(

@@ -27,6 +27,8 @@ const
       '../libcrash-js/crash-js');
 _cmdline_check =
   _libcrash._cmdline_check;
+_error_display =
+  _libcrash._error_display;
 _msg_info =
   _libcrash._msg_info
 _msg_error =
@@ -67,30 +69,6 @@ function
     [];
   quiet =
     '';
-}
-
-function
-  _error_handle(
-    _error) {
-  let
-    _message;
-  if ( 'error' in _error && 
-       _error['error'] != undefined &&
-       'message' in _error['error'] ) {
-    _message =
-      _error['error']['message'];
-  }
-  else if ( 'shortMessage' in _error ) {
-    _message =
-      _error['shortMessage'];
-  }
-  else {
-    _message =
-      _error;
-  }
-  _msg_error(
-    _message,
-    0);
 }
 
 function
@@ -186,9 +164,10 @@ async function
       else if ( _value == undefined ) {
         throw "Value undefined, static call error";
       }
-    } catch (error) {
-      _error_handle(
-        error);
+    } catch (
+        _error) {
+      _error_display(
+        _error);
       _retry =
         _retry + 1;
       _msg_error(

@@ -174,34 +174,37 @@ function
   return new Promise(resolve => setTimeout(resolve, _time));
 }
 
-
 function
   _error_handle(
     _error) {
   let
-    _msg;
-  if ( _error == undefined ) {
-    _msg =
-      "Error undefined."
-  }
-  else if ( 'error' in _error && 
-       _error['error'] != undefined &&
-       'message' in _error['error'] ) {
-    _msg =
-      _error['error']['message'];
-  }
-  else if ( 'shortMessage' in _error ) {
-    _msg =
-      _error['shortMessage'];
+    _message;
+  if ( typeof(error) == "object" ) {
+    if ( 'error' in _error && 
+         _error['error'] != undefined &&
+         'message' in _error['error'] ) {
+      _message =
+        _error['error']['message'];
+    }
+    else if ( 'shortMessage' in _error ) {
+      _message =
+        _error['shortMessage'];
+    }
+    else {
+      _message =
+        _error;
+    }
+    console.error(
+      _error);
   }
   else {
-    _msg =
-      "Unknown error.";
+    _message =
+      _error;
     console.error(
       _error);
   }
   _msg_error(
-    _msg,
+    _message,
     0);
 }
 

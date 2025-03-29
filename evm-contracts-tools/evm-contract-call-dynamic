@@ -243,7 +243,7 @@ async function
     _msg_info(
       "Setting timeout to '300' seconds.");
     _call_timeout =
-      300;
+      300000;
   }
   else {
     _call_timeout =
@@ -340,7 +340,7 @@ async function
     _msg_info(
       "Setting timeout to '300' seconds.");
     _call_timeout =
-      300;
+      300000;
   }
   _call_timeout =
     Number(
@@ -449,7 +449,7 @@ function
   }
   if ( call_timeout == "" ) {
     call_timeout =
-      300;
+      300000;
   }
   if ( msg_value == "" ) {
     msg_value =

@@ -39,7 +39,7 @@ _BASH_FILES=\
   evm-contract-deployer-get \
   evm-contract-deployment-address \
   evm-contract-deployment-networks \
-  evm-contract-deployment-versions" \
+  evm-contract-deployment-versions \
   evm-contract-deployments-dir
 _NODE_FILES=\
   contract-get \

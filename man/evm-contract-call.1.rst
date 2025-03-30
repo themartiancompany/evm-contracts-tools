@@ -56,6 +56,7 @@ well as direct RPC addresses.
 Options
 =======
 
+-a                      Call authentication.
 -A abi                  Contract ABI path.
 -B bytecode             Contract bytecode path.
 -C compiler_output      Contract compiler output

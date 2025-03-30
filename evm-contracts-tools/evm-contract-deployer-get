@@ -46,7 +46,6 @@ _global_variables() {
   deployer_verify=""
   contract_address=""
   transaction_deployment=""
-  retries_max=""
   color=""
   quiet=""
 }

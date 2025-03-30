@@ -43,24 +43,14 @@ _sourced \
 _global_variables() {
   call_date=""
   call_type=""
-  call_timeout=""
-  wallet_name=""
-  wallet_path=""
-  wallet_password=""
-  wallet_address=""
-  wallet_seed=""
-  api_key=""
-  target_network=""
-  rpc_selection=""
+  _libevm_global_variables
   contract_address=""
   contract_bytecode=""
   contract_compiler_output=""
   contract_abi=""
   contract_method=""
   method_args=()
-  msg_value=""
   measure_unit=""
-  retries_max=""
   color=""
   quiet=""
 }
@@ -417,14 +407,14 @@ _set_overrides() {
     "retries" \
     "max" \
     "300"
+  _set_overrides \
+    "call" \
+    "auth" \
+    "n"
   _set_override \
     "contract" \
     "address" \
     ""
-  _set_override \
-    "wallet" \
-    "name" \
-    "default"
   _set_override \
     "target" \
     "network" \
@@ -467,29 +457,10 @@ _set_overrides() {
       _contract_abi_auto_detect
     fi
   fi
-  _set_override \
-    "wallet" \
-    "path" \
-    "$(_wallet_path_get \
-         "evm-wallet" \
-         "${wallet_name}")"
-  _secret_auto_detect \
-    "seed" \
-    "seed" \
+  _wallet_overrides_set \
     "evm-wallet" \
-    "${wallet_name}"
-  _secret_auto_detect \
-    "password" \
-    "plain" \
-    "evm-wallet" \
-    "${wallet_name}"
-  _set_override \
-    "wallet" \
-    "address" \
-    "$(evm-wallet \
-         get \
-           "${wallet_name}" \
-           "address")"
+    "default" \
+    "${call_auth}"
 }
 
 # Show help usage, with an exit status.
@@ -518,6 +489,8 @@ Usage:
     well as directly RPC address
 
   options:
+     -a                     Call authentication.
+                            Default: ${call_auth}
      -A <abi>               Contract ABI path.
                             Default: ${contract_abi}
      -B <bytecode>          Contract bytecode path.
@@ -615,10 +588,11 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'A:B:C:N:w:p:s:n:t:T:k:V:u:r:S:cvh?' \
+    'aA:B:C:N:w:p:s:n:t:T:k:V:u:r:S:cvh?' \
     arg; do
   case \
     "${arg}" in
+    a) override_call_auth="y" ;;
     A) override_contract_abi="${OPTARG}" ;;
     B) override_contract_bytecode="${OPTARG}" ;;
     C) override_contract_compiler_output="${OPTARG}" ;;
@@ -651,7 +625,7 @@ shift \
     OPTIND - 1 ))
 if (( $# < 1 )); then
   _msg_error \
-    "no address given" \
+    "No address given." \
     0
   _set_overrides
   _usage \
@@ -659,7 +633,7 @@ if (( $# < 1 )); then
 fi
 if (( $# < 2 )); then
   _msg_error \
-    "no method given" \
+    "No method given." \
     0
   _set_overrides
   _usage \

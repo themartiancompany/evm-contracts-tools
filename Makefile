@@ -57,7 +57,7 @@ _INSTALL_SCRIPTS_TARGETS=\
   install-bash-scripts \
   install-node-scripts
 _INSTALL_TARGETS=\
-  install-scripts
+  install-scripts \
   install-doc \
   install-man
 _INSTALL_TARGETS_ALL=\

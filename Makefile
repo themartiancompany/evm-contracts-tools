@@ -82,7 +82,7 @@ install-scripts: $(_INSTALL_SCRIPTS_TARGETS)
 
 install-bash-scripts:
 
-	for _file in $(_BASH_SCRIPTS); do \
+	for _file in $(_BASH_FILES); do \
 	  $(_INSTALL_EXE) \
 	    "$(_PROJECT)/$${_file}" \
 	    "$(BIN_DIR)/$${_file}"; \
@@ -90,7 +90,7 @@ install-bash-scripts:
 
 install-node-scripts:
 
-	for _file in $(_NODE_SCRIPTS); do \
+	for _file in $(_NODE_FILES); do \
 	  $(_INSTALL_EXE) \
 	    "$(_PROJECT)/$${_file}" \
 	    "$(LIB_DIR)/$(_PROJECT)/$${_file}"; \

@@ -42,15 +42,7 @@ _sourced \
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
-  call_auth=""
-  wallet_name=""
-  wallet_path=""
-  wallet_password=""
-  wallet_address=""
-  wallet_seed=""
-  api_key=""
-  target_network=""
-  rpc_selection=""
+  _libevm_global_variables
   deployer_verify=""
   contract_address=""
   transaction_deployment=""
@@ -200,56 +192,10 @@ _set_overrides() {
     "kirsh"
   _api_key_auto_detect \
     "${target_network}"
-  if [[ "${call_auth}" == "y" ]]; then
-    _set_override \
-      "wallet" \
-      "name" \
-      "default"
-    _set_override \
-      "wallet" \
-      "path" \
-      "$(_wallet_path_get \
-           "evm-wallet" \
-           "${wallet_name}")"
-    _secret_auto_detect \
-      "seed" \
-      "seed" \
-      "evm-wallet" \
-      "${wallet_name}"
-    _secret_auto_detect \
-      "password" \
-      "plain" \
-      "evm-wallet" \
-      "${wallet_name}"
-    _set_override \
-      "wallet" \
-      "address" \
-      "$(evm-wallet \
-           get \
-             "${wallet_name}" \
-             "address")"
-  elif [[ "${call_auth}" == "n" ]]; then
-    _set_override \
-      "wallet" \
-      "name" \
-      ""
-    _set_override \
-      "wallet" \
-      "path" \
-      ""
-    _set_override \
-      "wallet" \
-      "seed" \
-      ""
-    _set_override \
-      "wallet" \
-      "password" \
-      ""
-    _set_override \
-      "wallet" \
-      "address" \
-      ""
-  fi
+  _wallet_overrides_set \
+    "evm-wallet" \
+    "default" \
+    "${_call_auth}"
   _set_override \
     "deployer" \
     "verify" \

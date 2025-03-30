@@ -26,9 +26,9 @@ BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
 LIB_DIR=$(DESTDIR)$(PREFIX)/lib
 
-_INSTALL_FILE=install -Dm644
-_INSTALL_DIR=install -dm755
-_INSTALL_EXE=install -Dm755
+_INSTALL_FILE=install -vDm644
+_INSTALL_DIR=install -vdm755
+_INSTALL_EXE=install -vDm755
 
 DOC_FILES=\
   $(wildcard *.rst) \

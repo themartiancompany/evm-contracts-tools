@@ -33,52 +33,68 @@ _INSTALL_EXE=install -Dm755
 DOC_FILES=\
   $(wildcard *.rst) \
   $(wildcard *.md)
-SCRIPT_FILES=$(wildcard $(_PROJECT)/*)
 
+_BASH_FILES=\
+  evm-contract-call \
+  evm-contract-deployer-get \
+  evm-contract-deployment-address \
+  evm-contract-deployment-networks \
+  evm-contract-deployment-versions" \
+  evm-contract-deployments-dir
+_NODE_FILES=\
+  contract-get \
+  deployer-get \
+  deployer-verify \
+  evm-contract-call-dynamic \
+  evm-contract-call-static
+
+_CHECK_TARGETS=\
+  shellcheck
+_CHECK_TARGETS_ALL=\
+  check \
+  $(_CHECK_TARGETS)
+_INSTALL_SCRIPTS_TARGETS=\
+  install-bash-scripts \
+  install-node-scripts
+_INSTALL_TARGETS=\
+  install-scripts
+  install-doc \
+  install-man
+_INSTALL_TARGETS_ALL=\
+  install \
+  $(_INSTALL_TARGETS) \
+  $(_INSTALL_SCRIPTS_TARGETS)
+
+_PHONY_TARGETS=\
+  $(_CHECK_TARGETS_ALL) \
+  $(_INSTALL_TARGETS_ALL)
+  
 all:
 
 check: shellcheck
 
 shellcheck:
-	shellcheck -s bash $(SCRIPT_FILES)
+	shellcheck -s bash $(_BASH_FILES)
 
-install: install-scripts install-doc install-man
+install: $(_INSTALL_TARGETS)
 
-install-scripts:
+install-scripts: $(_INSTALL_SCRIPTS_TARGETS)
 
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-call-dynamic" \
-	  "$(LIB_DIR)/$(_PROJECT)/evm-contract-call-dynamic"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-call-static" \
-	  "$(LIB_DIR)/$(_PROJECT)/evm-contract-call-static"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/contract-get" \
-	  "$(LIB_DIR)/$(_PROJECT)/contract-get"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/deployer-get" \
-	  "$(LIB_DIR)/$(_PROJECT)/deployer-get"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/deployer-verify" \
-	  "$(LIB_DIR)/$(_PROJECT)/deployer-verify"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-deployer-get" \
-	  "$(BIN_DIR)/evm-contract-deployer-get"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-deployment-address" \
-	  "$(BIN_DIR)/evm-contract-deployment-address"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-deployment-networks" \
-	  "$(BIN_DIR)/evm-contract-deployment-networks"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-deployment-versions" \
-	  "$(BIN_DIR)/evm-contract-deployment-versions"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-deployments-dir" \
-	  "$(BIN_DIR)/evm-contract-deployments-dir"
-	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/evm-contract-call" \
-	  "$(BIN_DIR)/evm-contract-call"
+install-bash-scripts:
+
+	for _file in $(_BASH_SCRIPTS); do \
+	  $(_INSTALL_EXE) \
+	    "$(_PROJECT)/$${_file}" \
+	    "$(BIN_DIR)/$${_file}"; \
+	done
+
+install-node-scripts:
+
+	for _file in $(_NODE_SCRIPTS); do \
+	  $(_INSTALL_EXE) \
+	    "$(_PROJECT)/$${_file}" \
+	    "$(LIB_DIR)/$(_PROJECT)/$${_file}"; \
+	done
 
 install-doc:
 
@@ -98,4 +114,4 @@ install-man:
 	  "man/evm-contract-deployer-get.1.rst" \
 	  "$(MAN_DIR)/man1/evm-contract-deployer-get.1"
 
-.PHONY: check install install-doc install-man install-scripts shellcheck
+.PHONY: $(_PHONY_TARGETS)

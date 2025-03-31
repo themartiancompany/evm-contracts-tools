@@ -407,7 +407,7 @@ _set_overrides() {
     "retries" \
     "max" \
     "300"
-  _set_overrides \
+  _set_override \
     "call" \
     "auth" \
     "n"

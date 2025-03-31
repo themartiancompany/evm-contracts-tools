@@ -43,7 +43,6 @@ _sourced \
 _global_variables() {
   call_date=""
   call_type=""
-  _libevm_global_variables
   contract_address=""
   contract_bytecode=""
   contract_compiler_output=""
@@ -382,6 +381,20 @@ _artifact_local_auto_detect() {
     "${_artifact}"
 }
 
+_call_auth_auto_detect() {
+  local \
+    _call_auth
+  if [[ "${call_type}" == "static"  ]]; then
+    _call_auth="n"
+  elif [[ "${call_type}" == "dynamic"  ]]; then
+    _call_auth="y"
+  fi
+  _set_override \
+    "call" \
+    "auth" \
+    "${_call_auth}"
+}
+
 _set_overrides() {
   local \
     _abi \
@@ -404,21 +417,17 @@ _set_overrides() {
     "date" \
     "$(_get_date_human)"
   _set_override \
-    "retries" \
-    "max" \
-    "300"
-  _set_override \
-    "call" \
-    "auth" \
-    "n"
-  _set_override \
     "contract" \
     "address" \
     ""
   _set_override \
+    "retries" \
+    "max" \
+    "300"
+  _set_override \
     "target" \
     "network" \
-    "Gnosis"
+    "100"
   _set_override \
     "rpc" \
     "selection" \
@@ -427,6 +436,7 @@ _set_overrides() {
     "call" \
     "type" \
     "static"
+  _call_auth_auto_detect
   _set_override \
     "call" \
     "timeout" \
@@ -585,6 +595,7 @@ _show_config() {
 
 _globals
 _global_variables
+_libevm_global_variables
 _requirements
 # shellcheck disable=SC2034
 while \

@@ -56,10 +56,12 @@ _CHECK_TARGETS_ALL=\
 _INSTALL_SCRIPTS_TARGETS=\
   install-bash-scripts \
   install-node-scripts
-_INSTALL_TARGETS=\
-  install-scripts \
+INSTALL_DOC_TARGETS=\
   install-doc \
   install-man
+_INSTALL_TARGETS=\
+  install-scripts \
+  $(_INSTALL_DOC_TARGETS)
 _INSTALL_TARGETS_ALL=\
   install \
   $(_INSTALL_TARGETS) \

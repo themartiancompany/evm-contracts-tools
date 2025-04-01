@@ -270,8 +270,8 @@ async function
     _msg_info(
       "Dynamic contract call crashed.");
     _error_display(
-      error)
-    throw error;
+      _error)
+    throw _error;
   };
   return _receipt;
 }

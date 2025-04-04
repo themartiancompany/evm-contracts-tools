@@ -42,7 +42,6 @@ _sourced \
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
-  _libevm_global_variables
   deployer_verify=""
   contract_address=""
   transaction_deployment=""
@@ -117,6 +116,11 @@ _evm_contract_deployer_get() {
     _msg=()
   shift \
     12
+  _contract_address="$( \
+    _lower \
+      "${_contract_address}")"
+  _address_sanity_check \
+    "${_contract_address}"
   _node_run_opts+=(
     -r
       "${_retries_max}"
@@ -301,6 +305,8 @@ _show_config() {
 
 _globals
 _global_variables
+_libevm_global_variables
+# _libevm_app_global_variables
 _requirements
 # shellcheck disable=SC2034
 while \

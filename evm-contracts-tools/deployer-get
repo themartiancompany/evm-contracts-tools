@@ -107,6 +107,8 @@ async function
     _transaction_contract,
     _tx,
     _wallet_password;
+  _contract_address =
+    _contract_address.toLowerString();
   _attempt =
     1;
   _wallet_password =
@@ -168,7 +170,7 @@ async function
       }
       else if ( _receipt != undefined ) {
 	_transaction_contract =
-          _receipt.contractAddress;
+          _receipt.contractAddress.toLowerCase();
       }
       if ( _transaction_contract != _contract_address ) {
         console.error(

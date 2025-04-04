@@ -194,7 +194,7 @@ _set_overrides() {
   _wallet_overrides_set \
     "evm-wallet" \
     "default" \
-    "${_call_auth}"
+    "${call_auth}"
   _set_override \
     "deployer" \
     "verify" \

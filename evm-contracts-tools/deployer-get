@@ -108,7 +108,7 @@ async function
     _tx,
     _wallet_password;
   _contract_address =
-    _contract_address.toLowerString();
+    _contract_address.toLowerCase();
   _attempt =
     1;
   _wallet_password =

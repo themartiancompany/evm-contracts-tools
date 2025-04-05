@@ -43,6 +43,7 @@ _sourced \
 _global_variables() {
   call_date=""
   call_type=""
+  index_retrieve=""
   contract_address=""
   contract_bytecode=""
   contract_compiler_output=""
@@ -66,17 +67,12 @@ _requirements() {
   _check_cmd \
     'evm-contracts-abi-get'
   _check_cmd \
+    'evm-contracts-source-get' \
+    'evm-contract-source-index'
+  _check_cmd \
     'evm-wallet'
   _check_cmd \
     'node-run'
-}
-
-_get_conf_dir_path() {
-  local \
-    _dir
-  _dir="${HOME}/.config/${app_name}"
-  echo \
-    "${_dir}"
 }
 
 _evm_contract_call_type() {
@@ -104,7 +100,7 @@ _artifact_missing_reset() {
       "'${_artifact}' does not"
       "exist."
     )
-    _msg_warning \
+    _msg_info \
       "${_msg[*]}"
     _set \
       "_contract" \
@@ -222,80 +218,6 @@ _evm_contract_call() {
     "${_args[@]}"
 }
 
-# TODO: add contracts source index support when its ready
-#       and move to libEVM.
-_contract_abi_retrieve() {
-  local \
-    _evm_contracts_abi_get_opts=() \
-    _msg=() \
-    _data_dir
-  _msg=(
-    "No contract ABI or compiler output"
-    "available, attempting to obtain it from"
-    "a network's contracts ABI provider"
-    "at path '${_abi_target}'."
-  )
-  _msg_info \
-    "${_msg[*]}"
-  _data_dir="$( \
-    dirname \
-      "${_abi}")"
-  mkdir \
-    -p \
-    "${_data_dir}"
-  chmod \
-    700 \
-    "${_data_dir}"
-  if [[ "${quiet}" == "n" ]]; then
-    _evm_contracts_abi_get_opts+=(
-      --verbose
-    )
-  fi
-  _evm_contracts_abi_get_opts+=(
-    --network
-      "${_network}"
-    --key 
-      "${_key}"
-    --output-file
-      "${_abi_target}"
-  )
-  if [ ! -e "${_key}" ]; then
-    _msg=(
-      "Contract ABI provider API"
-      "key '${_key}' not found,"
-      "fetch the ABI from the"
-      "provider may not work."
-    )
-    _msg_info \
-      "${_msg[*]}"
-  elif [ -e "${_key}" ]; then
-    _evm_contracts_abi_get_opts+=(
-      --key 
-        "${_key}"
-    )
-  fi
-  evm-contracts-abi-get \
-    "${_evm_contracts_abi_get_opts[@]}" \
-      "${_address}"
-  if [ $? -eq 0 ]; then
-    _msg=(
-      "Obtained ABI from a network explorer,"
-      "setting contract ABI value to '${_abi_target}'."
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _abi="${_abi_target}"
-  else
-    _msg=(
-      "Couldn't obtain contract ABI"
-      "from the provider, blanking contract ABI value."
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _abi=""
-  fi
-}
-
 # This overrides the LibEVM one
 _contract_abi_auto_detect() {
   local \
@@ -303,7 +225,8 @@ _contract_abi_auto_detect() {
     _address \
     _compiler_output \
     _key \
-    _network
+    _network \
+    _abi_dir
   _network="${target_network}"
   _address="${contract_address}"
   _key="${api_key}"
@@ -315,12 +238,16 @@ _contract_abi_auto_detect() {
       _default_artifact_path_get \
         "abi")"
   fi
+  _abi_dir="$( \
+    dirname \
+      "${_abi}")"
   if [[ ! -e "${_abi}" ]] && \
      [[ ! -e "${_compiler_output}" ]]; then
     if [[ -e "${_abi_target}" ]]; then
       _abi="${_abi_target}"
     elif [[ ! -e "${_abi_target}" ]]; then
-      _contract_abi_retrieve
+      _contract_artifacts_retrieve \
+        "${_abi_dir}"
     fi
   fi
   _set \
@@ -417,6 +344,10 @@ _set_overrides() {
     "date" \
     "$(_get_date_human)"
   _set_override \
+    "index" \
+    "retrieve" \
+    "n"
+  _set_override \
     "contract" \
     "address" \
     ""
@@ -499,31 +430,8 @@ Usage:
     well as directly RPC address
 
   options:
-     -a                     Call authentication.
-                            Default: ${call_auth}
-     -A <abi>               Contract ABI path.
-                            Default: ${contract_abi}
-     -B <bytecode>          Contract bytecode path.
-                            Default: ${contract_bytecode}
-     -C <compiler_output>   Contract compiler output
-                            path (the hardhat artifact).
-                            Default: ${contract_compiler_output}
-     -N <wallet_name>       EVM wallet name.
-                            Default: ${wallet_name}
-     -w <wallet_path>       EVM wallet file path.
-                            Default: ${wallet_path}
-     -p <wallet_path>       EVM wallet password file.
-                            Default: ${wallet_password}
-     -s <wallet_seed>       EVM wallet seed file.
-                            Default: ${wallet_seed}
-     -n <network>           EVM network name. Accepted values
-                            are all those supported by
-                            evm-chains-info and RPC addresses.
-                            Default: ${target_network}
      -t <call_type>         Static or dynamic.
                             Default: ${call_type}
-     -k <api_key>           Etherscan-like service key.
-                            Default: ${api_key}
      -V <msg_value>         How much <measure_unit> attach to the
                             transaction.
                             Default: ${msg_value}
@@ -539,6 +447,36 @@ Usage:
      -S <rpc_selection>     RPC selection method. It can be
                             'kirsh' or 'random'.
                             Default: ${rpc_selection}
+     -A <abi>               Contract ABI path.
+                            Default: ${contract_abi}
+     -B <bytecode>          Contract bytecode path.
+                            Default: ${contract_bytecode}
+     -C <compiler_output>   Contract compiler output
+                            path (the hardhat artifact).
+                            Default: ${contract_compiler_output}
+     -I                     Enables retrieving contract's artifacts
+                            from the EVM Contracts Source Index.
+                            Default: ${index_retrieve}
+
+  credentials options:
+     -N <wallet_name>       EVM wallet name.
+                            Default: ${wallet_name}
+     -w <wallet_path>       EVM wallet file path.
+                            Default: ${wallet_path}
+     -p <wallet_path>       EVM wallet password file.
+                            Default: ${wallet_password}
+     -s <wallet_seed>       EVM wallet seed file.
+                            Default: ${wallet_seed}
+     -k <api_key>           Etherscan-like service key.
+                            Default: ${api_key}
+
+  libEVM options:
+     -a                     Call authentication.
+                            Default: ${call_auth}
+     -n <network>           EVM network name. Accepted values
+                            are all those supported by
+                            evm-chains-info and RPC addresses.
+                            Default: ${target_network}
 
      -h                     This message.
      -c                     Enable color output
@@ -598,38 +536,63 @@ _global_variables
 _libevm_global_variables
 _requirements
 # shellcheck disable=SC2034
+getopts_opts="$( \
+  printf \
+    "%s" \
+    "t:T:I:V:u:r:S:" \
+    "A:B:C:" \
+    "$(_libevm_app_getopts_params_get)" \
+    "a:n:" \
+    "$(_wallet_getopts_params_get)" \
+    "cvh")"
 while \
   getopts \
-    'aA:B:C:N:w:p:s:n:t:T:k:V:u:r:S:cvh?' \
+    "${getopts_opts}" \
     arg; do
+  _wallet_getopts_case
+  _libevm_app_getopts_case
   case \
     "${arg}" in
-    a) override_call_auth="y" ;;
-    A) override_contract_abi="${OPTARG}" ;;
-    B) override_contract_bytecode="${OPTARG}" ;;
-    C) override_contract_compiler_output="${OPTARG}" ;;
-    N) override_wallet_name="${OPTARG}" ;;
-    w) override_wallet_path="${OPTARG}" ;;
-    p) override_wallet_password="${OPTARG}" ;;
-    s) override_wallet_seed="${OPTARG}" ;;
-    n) override_target_network="${OPTARG}" ;;
-    t) override_call_type="${OPTARG}" ;;
-    T) override_call_timeout="${OPTARG}" ;;
-    k) override_api_key="${OPTARG}" ;;
-    V) override_msg_value="${OPTARG}" ;;
-    u) override_measure_unit="${OPTARG}" ;;
-    r) override_retries_max="${OPTARG}" ;;
-    S) override_rpc_selection="${OPTARG}" ;;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
-         _usage \
-           0 ;;
-    *) _msg_error \
-         "Invalid argument '${arg}'" \
-         0 && \
-       _usage \
-         1 ;;
+    t) \
+      override_call_type="${OPTARG}" ;;
+    T) \
+      override_call_timeout="${OPTARG}" ;;
+    I) \
+      override_index_retrieve="y" ;;
+    V) \
+      override_msg_value="${OPTARG}" ;;
+    u) \
+      override_measure_unit="${OPTARG}" ;;
+    r) \
+      override_retries_max="${OPTARG}" ;;
+    S) \
+      override_rpc_selection="${OPTARG}" ;;
+    A) \
+      override_contract_abi="${OPTARG}" ;;
+    B) \
+      override_contract_bytecode="${OPTARG}" ;;
+    C) \
+      override_contract_compiler_output="${OPTARG}" ;;
+    a) \
+      override_call_auth="y" ;;
+    n) \
+      override_target_network="${OPTARG}" ;;
+    c) \
+      override_color="y" ;;
+    v) \
+      override_quiet="n" ;;
+    h) \
+      _set_overrides && \
+      _usage \
+        0 ;;
+    *) \
+      if [[ " ${getopts_opts} " != *"${arg}"* ]]; then
+        _msg_error \
+          "Invalid argument '${arg}'." \
+          0
+        _usage \
+          1
+      fi ;;
   esac
 done
 shift \

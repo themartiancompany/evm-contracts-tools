@@ -415,6 +415,7 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
+
 Runs a smart contract function.
 
 Usage:

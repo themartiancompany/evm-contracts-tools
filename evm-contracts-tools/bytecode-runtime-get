@@ -1,0 +1,423 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
+_error_display =
+  _libcrash._error_display;
+_msg_info =
+  _libcrash._msg_info
+_msg_error =
+  _libcrash._msg_error
+_printf =
+  _libcrash._printf
+const
+  _contract_get_module =
+    require(
+      './contract-get');
+_contract_get =
+  _contract_get_module._contract_get
+
+
+function
+  _global_variables() {
+  app_name =
+    "evm-contract-call-static";
+  wallet_seed =
+    '';
+  retries_max =
+    '';
+  api_key_path =
+    '';
+  target_network =
+    '';
+  contract_address =
+    '';
+  contract_abi_path =
+    '';
+  contract_bytecode_path =
+    '';
+  contract_compiler_output_path =
+    '';
+  contract_method =
+    '';
+  method_args =
+    [];
+  quiet =
+    '';
+}
+
+function
+  _delay(
+    _time) {
+  return new Promise(resolve => setTimeout(resolve, _time));
+}
+
+function
+  _msg_info_contract_obtained(
+    _contract) {
+  let
+    _msg,
+    _template;
+  _template =
+    "Contract '{_contract}' obtained.";
+  _msg =
+    _template.replaceAll(
+      "{_contract}",
+      _contract);
+  _msg_info(
+    _msg);
+}
+
+function
+  _msg_info_method_obtained(
+    _method) {
+  let
+    _msg;
+  _msg =
+    "Method obtained.";
+  _msg_info(
+    _msg);
+}
+
+async function
+  _contract_call_static(
+    _wallet_seed,
+    _retries_max,
+    _api_key_path,
+    _target_network,
+    _contract_abi_path,
+    _contract_bytecode_path,
+    _contract_compiler_output_path,
+    _contract_address,
+    _contract_method,
+    _method_args) {
+  let
+    _contract,
+    _contract_get_opts,
+    _method,
+    _passed,
+    _value,
+    _wallet_password;
+  _retry =
+    1;
+  _wallet_password =
+    "";
+  _contract_get_opts = [
+    _wallet_seed,
+    _wallet_password,
+    _contract_address,
+    _contract_abi_path,
+    _contract_bytecode_path,
+    _contract_compiler_output_path,
+    _target_network,
+    _api_key_path,
+  ];
+  _passed = 
+    false;
+  while ( _retry <= _retries_max &&
+          _passed == false ) {
+    try {
+      _contract =
+        await _contract_get.apply(
+          null,
+          _contract_get_opts);
+      _msg_info_contract_obtained(
+        _contract);
+      _method =
+        await _contract.getFunction(
+          _contract_method);
+      _msg_info_method_obtained(
+        _method);
+      _value =
+        await _method.staticCall.apply(
+          null,
+          _method_args);
+      if ( _value != undefined ) {
+        _passed =
+          true;
+      }
+      else if ( _value == undefined ) {
+        throw "Value undefined, static call error";
+      }
+    } catch (
+        _error) {
+      _error_display(
+        _error);
+      _retry =
+        _retry + 1;
+      _msg_error(
+        "Increasing retry and waiting 3 seconds.",
+        0);
+      await _delay(
+        3000);
+    }
+  }
+  if ( _retry > _retries_max ) {
+    throw "Maximum number of retries reached.";
+  }
+  return _value;
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _method_args,
+    _text;
+  _text =
+    [];
+  _text.push(
+    "Static call configuration:");
+  _text.push(
+    "  evm-contract-call-static configuration:");
+  _text.push(
+    "             Wallet seed: {wallet_seed}".replace(
+      "{wallet_seed}",
+      wallet_seed));
+  _text.push(
+    "             Max retries: {retries_max}".replace(
+      "{retries_max}",
+      retries_max));
+  _text.push(
+    "            API Key path: {api_key_path}".replace(
+      "{api_key_path}",
+      api_key_path));
+  _text.push(
+    "          Target network: {target_network}".replace(
+      "{target_network}",
+      target_network));
+  _text.push(
+    "            Contract ABI: {contract_abi_path}".replace(
+      "{contract_abi_path}",
+      contract_abi_path));
+  _text.push(
+    "       Contract bytecode: {contract_bytecode_path}".replace(
+      "{contract_bytecode_path}",
+      contract_bytecode_path));
+  _text.push(
+    "Contract compiler output: {contract_compiler_output_path}".replace(
+      "{contract_compiler_output_path}",
+      contract_compiler_output_path));
+  _text.push(
+    "        Contract address: {contract_address}".replace(
+      "{contract_address}",
+      contract_address));
+  _text.push(
+    "         Contract method: {contract_method}".replace(
+      "{contract_method}",
+      contract_method));
+  _method_args =
+    method_args.join(
+    " ");
+  _text.push(
+    "             Method args: {method_args}".replace(
+      "{method_args}",
+      _method_args));
+  for (_line of _text)  { 
+    _msg_info(
+      _line);
+  }
+}
+
+function
+  _usage(
+    _exit) {
+  let
+    _line,
+    _text;
+  _text = [
+    "Execute a static call to an EVM network's contract method",
+    "",
+    "Usage:",
+    "  evm-contract-call-static",
+    "    <quiet>",
+    "    <wallet_seed>",
+    "    <retries_max>",
+    "    <api_key_path>",
+    "    <target_network>",
+    "    <contract_abi_path>",
+    "    <contract_bytecode_path>",
+    "    <contract_compiler_output_path>",
+    "    <contract_address>",
+    "    <contract_method>",
+    "    <method_args>",
+    "",
+    "Args:",
+    "  <quiet>                          Can be 'y' or 'n'",
+    "                                   Default: y",
+    "  <wallet_seed>                    Path of the file containing",
+    "                                   the seed phrase.",
+    "  <retries_max>                    Maximum number of retries before",
+    "                                   failing.",
+    "  <api_key_path>                   Path of the API key for the",
+    "                                   contract ABI provider service",
+    "  <target_network>                 Network on which the contract",
+    "                                   resides.",
+    "  <contract_abi_path>              Path of the contract ABI",
+    "  <contract_bytecode_path>         Path for the contract bytecode",
+    "  <contract_compiler_output_path>  Path for the contract compiler",
+    "                                   output path (the hardhat artifact).",
+    "  <contract_address>               Address of the contract",
+    "  <contract_method>                Contract method to execute",
+    "  [method_args]                    Arguments to pass to the method",
+    "",
+    "  Options:",
+    "    -h                             This help."
+  ];
+  for (_line of _text) {
+    _msg_info(
+      _line);
+  }
+  subprocess.exit(
+    _exit);
+}
+
+function
+  _overrides_set() {
+  if ( retries_max == "" ) {
+    retries_max =
+      100;
+  }
+}
+
+function
+  _cmdline_parse() {
+  quiet =
+    "y";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        quiet =
+          _value;
+      }
+      if ( _index == 3 ) {
+        wallet_seed =
+          _value;
+      }
+      if ( _index == 4 ) {
+        retries_max =
+          _value;
+      }
+      if ( _index == 5 ) {
+        api_key_path =
+          _value;
+      }
+      if ( _index == 6 ) {
+        target_network =
+          _value;
+      }
+      if ( _index == 7 ) {
+        contract_abi_path =
+          _value;
+      }
+      if ( _index == 8 ) {
+        contract_bytecode_path =
+          _value;
+      }
+      if ( _index == 9 ) {
+        contract_compiler_output_path =
+          _value;
+      }
+      if ( _index == 10 ) {
+        contract_address =
+          _value;
+      }
+      if ( _index == 11 ) {
+        contract_method =
+          _value;
+      }
+      if ( 11 < _index ) {
+        method_args.push(
+          _value);
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        _usage(
+          0);
+      }
+    }
+  );
+  if ( contract_address == "" ) {
+    _usage(
+      1);
+  }
+}
+
+async function
+  _contract_call_static_cmdline(
+    _app_opts) {
+  try {
+    _value = 
+      await _contract_call_static.apply(
+        null,
+        _app_opts);
+    if ( _value != undefined ) {
+      _printf(
+        _value.toString());
+    }
+    else {
+      throw "Static contract call returned undefined value."
+    }
+  } catch (error) {
+    _msg_error(
+      error,
+      1);
+  }
+}
+
+
+if ( _cmdline_check(
+       "evm-contract-call-static") ) {
+  _global_variables();
+  _cmdline_parse();
+  _overrides_set();
+  _config_show();
+  app_opts = [
+    wallet_seed,
+    retries_max,
+    api_key_path,
+    target_network,
+    contract_abi_path,
+    contract_bytecode_path,
+    contract_compiler_output_path,
+    contract_address,
+    contract_method,
+    method_args
+  ];
+  _contract_call_static_cmdline(
+    app_opts);
+}
+
+module.exports = {
+  _contract_call_static:
+    _contract_call_static
+};
+

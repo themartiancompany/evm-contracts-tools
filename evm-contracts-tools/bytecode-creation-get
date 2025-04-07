@@ -55,11 +55,17 @@ const
       '../evm-transactions-tools/transaction-receipt-get');
 _transaction_receipt_get =
   _transaction_receipt_get_module._transaction_receipt_get;
+const
+  _deployer_get_module =
+    require(
+      './deployer-get');
+_deployer_get =
+  _deployer_get_module._deployer_get;
 
 function
   _global_variables() {
   app_name =
-    "deployer-get";
+    "bytecode-creation-get";
   wallet_seed =
     "";
   retries_max =
@@ -87,7 +93,7 @@ function
 }
 
 async function
-  _deployer_get(
+  _bytecode_creation_get(
     _wallet_seed,
     _retries_max,
     _api_key_path,
@@ -98,15 +104,18 @@ async function
     _transaction_deployment) {
   let
     _attempt,
-    _candidate,
+    _bytecode,
     _deployer,
-    _receipt,
-    _recipient,
+    _deployer_get_opts,
     _transaction_get_opts,
-    _transaction_receipt_get_opts,
-    _transaction_contract,
     _tx,
-    _wallet_password;
+    _wallet_password; //,
+    // _receipt,
+    // _transaction_receipt_get_opts,
+  if ( _contract_address == undefined ) {
+    _contract_address =
+      "";
+  }
   _contract_address =
     _contract_address.toLowerCase();
   _attempt =
@@ -138,6 +147,32 @@ async function
     _transaction_deployment
   ];
   while ( _attempt <= _retries_max ) {
+    // Why not also check the transaction
+    // is indeed the one which will contain
+    // the bytecode?
+    // if ( _contract_address != "" ) {
+    //   try {
+    //     _deployer_get_opts = [
+    //       _wallet_seed,
+    //       _retries_max,
+    //       _api_key_path,
+    //       _chain_id,
+    //       _chain_name,
+    //       _target_network,
+    //       _contract_address,
+    //       _transaction_deployment
+    //      ];
+    //       _deployer =
+    //         await _deployer_get.apply(
+    //           null,
+    //           _deployer_get_opts);
+    //   } catch(
+    //       _error) {
+    //     _error_display(
+    //       _error);
+    //     throw _error;
+    //   }
+    // }
     try {
       _tx =
         await _transaction_get.apply(
@@ -149,44 +184,22 @@ async function
                     "Undefined transaction." } };
       }
       else if ( _tx != undefined ) {
-        _candidate =
-          _tx.from;
-        _recipient =
-          _tx.to;
+        _bytecode =
+          _tx.data;
       }
-      if ( _recipient != null ) {
-        throw { "error": {
-                  "message":
-                    "The transaction is not a deployment."} };
-      }
-      _receipt =
-        await _transaction_receipt_get.apply(
-          null,
-          _transaction_receipt_get_opts);
-      if ( _receipt == undefined ) {
-        throw { "error": {
-                  "message":
-                    "Undefined transaction receipt."}};
-      }
-      else if ( _receipt != undefined ) {
-        _transaction_contract =
-          _receipt.contractAddress.toLowerCase();
-      }
-      if ( _transaction_contract != _contract_address ) {
-        console.error(
-          _receipt);
-        console.error(
-          "Contract address:",
-          _contract_address);
-        console.error(
-          "Transaction contract:",
-          _transaction_contract);
-        throw { "error": {
-                  "message":
-                    "The transaction does not deploy input contract."}};
-      }
-      _deployer =
-        _candidate;
+      // _receipt =
+      //   await _transaction_receipt_get.apply(
+      //     null,
+      //     _transaction_receipt_get_opts);
+      // if ( _receipt == undefined ) {
+      //   throw { "error": {
+      //             "message":
+      //               "Undefined transaction receipt."}};
+      // }
+      // else if ( _receipt != undefined ) {
+      //   _transaction_contract =
+      //     _receipt.contractAddress.toLowerCase();
+      // }
       break
     } catch (
         _error) {
@@ -206,7 +219,7 @@ async function
   if ( _attempt > _retries_max ) {
     throw "Maximum number of retries reached.";
   }
-  return _deployer;
+  return _bytecode;
 }
 
 function
@@ -218,7 +231,7 @@ function
   _text =
     [];
   _text.push(
-    "deployer-get configuration:");
+    "bytecode-creation-get configuration:");
   _text.push(
     "             Wallet seed: {wallet_seed}".replace(
       "{wallet_seed}",
@@ -265,10 +278,10 @@ function
     _line,
     _text;
   _text = [
-    "Returns the deployer address for a contract.",
+    "Returns the creation bytecode for a contract given its deployment transaction hash.",
     "",
     "Usage:",
-    "  deployer-get",
+    "  bytecode-creation-get",
     "    <quiet>",
     "    <wallet_seed>",
     "    <retries_max>",
@@ -368,15 +381,6 @@ function
       }
     }
   );
-  if ( contract_address == "" ) {
-    _msg_error(
-      "No contract address specified.",
-      0);
-    quiet =
-      "n";
-    _usage(
-      1);
-  }
   if ( transaction_deployment == "" ) {
     _msg_error(
       "No deployment transaction specified.",
@@ -389,24 +393,24 @@ function
 }
 
 async function
-  _deployer_get_cmdline(
+  _bytecode_creation_get_cmdline(
     _app_opts) {
   let
-    _deployer,
+    _bytecode,
     _msg;
   try {
-    _deployer = 
-      await _deployer_get.apply(
+    _bytecode = 
+      await _bytecode_creation_get.apply(
         null,
         _app_opts);
-    if ( _deployer != undefined ) {
+    if ( _bytecode != undefined ) {
       _printf(
-        _deployer.toString());
+        _bytecode.toString());
     }
     else {
       _msg =
-        "It has not been possible to determine " +
-	"the deployer from the transaction.";
+        "It has not been possible to retrieve " +
+	"the bytecode from the transaction.";
       throw _msg;
     }
   } catch (

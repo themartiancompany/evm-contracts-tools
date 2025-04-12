@@ -47,6 +47,7 @@ EVM Transactions Tools.
 
 Networks
 =========
+
 All those supported by
 'evm-chains-info' as
 well as direct RPC addresses.
@@ -54,17 +55,6 @@ well as direct RPC addresses.
 Options
 =======
 
--a                      Whether to perform an authenticated
-                        RPC call.
--N wallet_name          EVM wallet name.
--w wallet_path          EVM wallet file path.
--p wallet_path          EVM wallet password file.
--s wallet_seed          Standard 12-words seed phrase file.
--n network              EVM network name. Accepted values
-                        are all those supported by
-                        evm-chains-info as well as RPC addresses.
--t call_type            Static (read-only) or dynamic (read/write).
--k api_key              Etherscan-like service key.
 -V deployer_verify      Whether to verify the input
                         address is the deployer.
 -r retries_max          Maximum number of retries before
@@ -72,7 +62,29 @@ Options
 -S rpc_selection        RPC selection method. It can be
                         'kirsh' or 'random'.
 
--h                      This message.
+Credentials options
+=====================
+
+-N wallet_name          EVM wallet name.
+-w wallet_path          EVM wallet file path.
+-p wallet_path          EVM wallet password file.
+-s wallet_seed          Standard 12-words seed phrase file.
+-t call_type            Static (read-only) or dynamic (read/write).
+-k api_key              Etherscan-like service key.
+
+LibEVM options
+===============
+
+-a                      Whether to perform an authenticated
+                        RPC call.
+-n network              EVM network name. Accepted values
+                        are all those supported by
+                        evm-chains-info as well as RPC addresses.
+
+Application options
+====================
+
+-h                      Displays help.
 -c                      Enable color output
 -v                      Enable verbose output
 

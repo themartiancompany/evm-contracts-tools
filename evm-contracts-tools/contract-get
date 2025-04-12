@@ -56,11 +56,11 @@ const
 _wallet_get =
   _evm_wallet_get._wallet_get;
 const
-  _network_provider =
+  _network_provider_module =
     require(
       '../evm-wallet/network-provider');
 _provider_get =
-  _network_provider._provider_get;
+  _network_provider_module._provider_get;
 
 
 function

@@ -1,0 +1,427 @@
+#!/usr/bin/env bash
+
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+#    ----------------------------------------------------------------------
+#    Copyright © 2024, 2025  Pellegrino Prevete
+#
+#    All rights reserved
+#    ----------------------------------------------------------------------
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+_bin="$( \
+  dirname \
+    "$( \
+      command \
+        -v \
+	  "env")")"
+_lib="$( \
+  realpath \
+    "${_bin}/../lib")"
+_crash_bash="${_lib}/libcrash-bash/crash-bash"
+_libevm="${_lib}/libevm/libevm"
+_sourced \
+  "${_crash_bash}" 2>/dev/null || \
+  source \
+    "${_crash_bash}"
+_sourced \
+  "${_libevm}"
+
+# shellcheck disable=SC2034
+_global_variables() {
+  get_date=""
+  bytecode_type=""
+  bytecode_path=""
+  contract_address=""
+  transaction_deployment=""
+  color=""
+  quiet=""
+}
+
+_requirements() {
+  _check_cmd \
+    'libevm-requirements' \
+    'libevm'
+  libevm-requirements
+  _check_cmd \
+    "evm-chains-explorers"
+  _check_cmd \
+    "evm-chains-info"
+  _check_cmd \
+    'evm-contracts-abi-get'
+  _check_cmd \
+    'evm-wallet'
+  _check_cmd \
+    'node-run'
+}
+
+_get_conf_dir_path() {
+  local \
+    _dir
+  _dir="${HOME}/.config/${app_name}"
+  echo \
+    "${_dir}"
+}
+
+_bytecode_runtime_get() {
+  local \
+    _lib
+  _lib="$( \
+    _get_lib)/evm-contracts-tools"
+  echo \
+    "${_lib}/bytecode-runtime-get"
+}
+
+_bytecode_creation_get() {
+  local \
+    _lib
+  _lib="$( \
+    _get_lib)/evm-contracts-tools"
+  echo \
+    "${_lib}/bytecode-creation-get"
+}
+
+_evm_contract_bytecode_get() {
+  local \
+    _call_auth="${1}" \
+    _wallet_name="${2}" \
+    _wallet_path="${3}" \
+    _wallet_password="${4}" \
+    _wallet_seed="${5}" \
+    _api_key_path="${6}" \
+    _retries_max="${7}" \
+    _network="${8}" \
+    _rpc_selection="${9}" \
+    _bytecode_type="${10}" \
+    _contract_address="${10}" \
+    _bytecode_path="${11}" \
+    _node_run_opts=() \
+    _method_args=() \
+    _cmd \
+    _args=() \
+    _rpc_backend \
+    _chain_id \
+    _chain_name \
+    _msg=()
+  shift \
+    11
+  _contract_address="$( \
+    _lower \
+      "${_contract_address}")"
+  _address_sanity_check \
+    "${_contract_address}"
+  _node_run_opts+=(
+    -r
+      "${_retries_max}"
+  )
+  _rpc_backend_get \
+    "${_network}" \
+    "${_rpc_selection}"
+  _cmd="$( \
+    "_bytecode_${_bytecode_type}get")"
+  _args+=(
+    "${quiet}"
+    "${_wallet_seed}"
+    "${_retries_max}"
+    "${_api_key_path}"
+    "${_chain_id}"
+    "${_chain_name}"
+    "${_rpc_backend}"
+    "${_contract_address}"
+  )
+  if [[ "${deployer_verify}" != "" ]]; then
+    _cmd="$( \
+      _deployer_verify)"
+    _args+=(
+      "${deployer_verify}"
+    )
+  fi
+  _args+=(
+    "${_transaction_deployment}"
+  )
+  _msg=(
+    "Calling '$(basename "${_cmd}")'"
+    "with arguments '${_args[*]}'."
+  )
+  _msg_info \
+    "${_msg[*]}"
+  node-run \
+    "${_node_run_opts[@]}" \
+    "${_cmd}" \
+    "${_args[@]}"
+}
+
+_bytecode_path_auto_detect() {
+  local \
+    _bytecode_path
+  _bytecode_path=""
+  if [[ "${bytecode_type}" == "runtime" ]]; then
+    _bytecode_dir="${cache_dir}/${target_network}/${contract_address}"
+    mkdir \
+      -p \
+      "${_bytecode_dir}"
+    _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
+  fi
+}
+
+_cache_dir_auto_detect() {
+  local \
+    _cache_dir
+  _cache_dir="${HOME}/.cache/evm-contract-tools/bytecode"
+  if [[ "${override_cache_dir}" == ""  ]]; then
+    mkdir \
+      -p \
+      "${_cache_dir}"
+    chmod \
+      700 \
+      "${_cache_dir}"
+  fi
+  _set_override \
+    "cache" \
+    "dir" \
+    "${_cache_dir}"
+}
+
+_set_overrides() {
+  if [[ -v override_quiet ]]; then
+    quiet="${override_quiet}"
+  elif [[ -z "${quiet}" ]]; then
+    quiet="y"
+  fi
+  if [[ -v override_color ]]; then
+    color="${override_color}"
+  elif [[ -z "${color}" ]]; then
+    color="n"
+  fi
+  _set_override \
+    "call" \
+    "date" \
+    "$(_get_date_human)"
+  _set_override \
+    "call" \
+    "auth" \
+    "n"
+  _set_override \
+    "retries" \
+    "max" \
+    "300"
+  _set_override \
+    "target" \
+    "network" \
+    "100"
+  _set_override \
+    "rpc" \
+    "selection" \
+    "kirsh"
+  _api_key_auto_detect \
+    "${target_network}"
+  _wallet_overrides_set \
+    "evm-wallet" \
+    "default" \
+    "${call_auth}"
+  _set_override \
+    "bytecode" \
+    "type" \
+    "runtime"
+  _cache_dir_auto_detect
+  _bytecode_path_auto_detect
+}
+
+# Show help usage, with an exit status.
+# $1: exit status number.
+_usage() {
+  local \
+    _usage_text
+  IFS='' \
+    read \
+      -r \
+      -d '' \
+      _usage_text << \
+        ENDUSAGETEXT || true
+
+Retrieve the bytecodes for a contract.
+
+Usage:
+  ${app_name}
+    [options]
+    <contract_address>
+    (<transaction_deployment>)
+
+  networks:
+    all those supported by
+    'evm-chains-info' as
+    well as directly RPC address.
+
+  options:
+     -a                     Whether to perform an authenticated
+                            call.
+                            Default: ${call_auth}
+     -t <bytecode_type>     What kind of bytecode to get.
+                            It can be 'runtime' or 'creation'.
+                            Default: ${bytecode_type}
+     -r <retries_max>       Maximum number of retries before
+                            declaring the call failed.
+                            Default: ${retries_max}
+     -S <rpc_selection>     RPC selection method. It can be
+                            'kirsh' or 'random'.
+                            Default: ${rpc_selection}
+
+  credentials options:
+     -N <wallet_name>       EVM wallet name.
+                            Default: ${wallet_name}
+     -w <wallet_path>       EVM wallet file path.
+                            Default: ${wallet_path}
+     -p <wallet_path>       EVM wallet password file.
+                            Default: ${wallet_password}
+     -s <wallet_seed>       EVM wallet seed file.
+                            Default: ${wallet_seed}
+     -k <api_key>           Etherscan-like service key.
+                            Default: ${api_key}
+
+  libEVM options:
+     -n <network>           EVM network name. Accepted values
+                            are all those supported by
+                            evm-chains-info and RPC addresses.
+                            Default: ${target_network}
+
+     -h                     This message.
+     -c                     Enable color output
+     -v                     Enable verbose output
+ENDUSAGETEXT
+  _printf \
+    '%s\n' \
+    "${_usage_text}"
+  exit \
+    "${1}"
+}
+
+_display_array() {
+  local \
+    _array=() \
+    _item
+  _array+=(
+    "$@"
+  )
+  for _item \
+    in "${_array[@]}"; do
+  _msg_info \
+    "                            ${_item}"
+  done
+}
+
+# Shows configuration options.
+_show_config() {
+  _msg_info "${app_name} configuration"
+  _msg_info "                 Get date:   ${get_date}"
+  _msg_info "         Contract address:   ${contract_address}"
+  _msg_info "        Contract bytecode:   ${bytecode_path}"
+  _msg_info "   Deployment transaction:   ${transaction_deployment}"
+  _msg_info "       Authenticated call:   ${call_auth}"
+  _msg_info "     RPC selection method:   ${rpc_selection}"
+  _msg_info "              Max retries:   ${retries_max}"
+  _msg_info "    Credentials options:"
+  _msg_info "              Wallet name:   ${wallet_name}"
+  _msg_info "              Wallet path:   ${wallet_path}"
+  _msg_info "          Wallet password:   ${wallet_password}"
+  _msg_info "              Wallet seed:   ${wallet_seed}"
+  _msg_info "                  API key:   ${api_key}"
+  _msg_info "           Wallet address:   ${wallet_address}"
+  _msg_info "         LibEVM options:"
+  _msg_info "           Target network:   ${target_network}"
+}
+
+_globals
+_global_variables
+_libevm_global_variables
+# _libevm_app_global_variables
+_requirements
+# shellcheck disable=SC2034
+while \
+  getopts \
+    'aN:w:p:s:n:k:V:r:S:cvh?' \
+    arg; do
+  case \
+    "${arg}" in
+    a) override_call_auth="y" ;;
+    N) override_wallet_name="${OPTARG}" ;;
+    w) override_wallet_path="${OPTARG}" ;;
+    p) override_wallet_password="${OPTARG}" ;;
+    s) override_wallet_seed="${OPTARG}" ;;
+    n) override_target_network="${OPTARG}" ;;
+    k) override_api_key="${OPTARG}" ;;
+    V) override_deployer_verify="${OPTARG}" ;;
+    r) override_retries_max="${OPTARG}" ;;
+    S) override_rpc_selection="${OPTARG}" ;;
+    c) override_color="y" ;;
+    v) override_quiet="n" ;;
+    h|?) _set_overrides && \
+         _usage \
+           0 ;;
+    *) _msg_error \
+         "Invalid argument '${arg}'." \
+         0 && \
+       _set_overrides && \
+       _usage \
+         1 ;;
+  esac
+done
+shift \
+  $(( \
+    OPTIND - 1 ))
+if (( $# < 1 )); then
+  _msg_error \
+    "No contract address given." \
+    0
+  _set_overrides
+  _usage \
+    1
+fi
+# if (( $# < 2 )); then
+#   _msg_error \
+#     "No deployment transaction given." \
+#     0
+#   _set_overrides
+#   _usage \
+#     1
+# fi
+if (( 0 < $# )); then
+  contract_address="${1}"
+fi
+if (( 1 < $# )); then
+  _transaction_deployment="${1}"
+fi
+shift \
+  1
+_set_overrides
+_show_config
+app_opts=(
+  "${call_auth}"
+  "${wallet_name}"
+  "${wallet_path}"
+  "${wallet_password}"
+  "${wallet_seed}"
+  "${api_key}"
+  "${retries_max}"
+  "${target_network}"
+  "${rpc_selection}"
+  "${bytecode_type}"
+  "${contract_address}"
+  "${transaction_deployment}"
+  "${bytecode_path}"
+)
+_evm_contract_bytecode_get \
+  "${app_opts[@]}"
+
+# vim:set sw=2 sts=-1 et:

@@ -41,6 +41,12 @@ const
       './contract-get');
 _contract_get =
   _contract_get_module._contract_get
+const
+  _network_provider_module =
+    require(
+      '../evm-wallet/network-provider');
+_provider_get =
+  _network_provider_module._provider_get;
 
 function
   _global_variables() {
@@ -104,64 +110,53 @@ function
 }
 
 async function
-  _contract_call_static(
+  _bytecode_runtime_get(
     _wallet_seed,
     _retries_max,
     _api_key_path,
     _target_network,
-    _contract_abi_path,
-    _contract_bytecode_path,
-    _contract_compiler_output_path,
     _contract_address,
-    _contract_method,
-    _method_args) {
+    _contract_bytecode_path,
+    ) {
   let
-    _contract,
-    _contract_get_opts,
-    _method,
+    _code,
+    _network_provider,
     _passed,
-    _value,
     _wallet_password;
   _retry =
     1;
   _wallet_password =
     "";
-  _contract_get_opts = [
-    _wallet_seed,
-    _wallet_password,
-    _contract_address,
-    _contract_abi_path,
-    _contract_bytecode_path,
-    _contract_compiler_output_path,
-    _target_network,
-    _api_key_path,
-  ];
+  // _contract_get_opts = [
+  //   _wallet_seed,
+  //   _wallet_password,
+  //   _contract_address,
+  //   _contract_abi_path,
+  //   _contract_bytecode_path,
+  //   _contract_compiler_output_path,
+  //   _target_network,
+  //   _api_key_path,
+  // ];
   _passed = 
     false;
   while ( _retry <= _retries_max &&
           _passed == false ) {
     try {
-      _contract =
-        await _contract_get.apply(
-          null,
-          _contract_get_opts);
-      _msg_info_contract_obtained(
-        _contract);
-      _method =
-        await _contract.getFunction(
-          _contract_method);
-      _msg_info_method_obtained(
-        _method);
-      _value =
-        await _method.staticCall.apply(
-          null,
-          _method_args);
-      if ( _value != undefined ) {
+      _network_provider =
+        await _provider_get(
+          _target_network,
+          _api_key);
+      _code =
+        await _network_provider.getCode(
+          _contract_address);
+      if ( _code != undefined ) {
         _passed =
           true;
       }
-      else if ( _value == undefined ) {
-        throw "Value undefined, static call error";
+      else if ( _code == undefined ) {
+        throw {"error": {
+                 "message":
+                   "Code not retrieved." } };
       }
     } catch (
         _error) {
@@ -179,7 +174,7 @@ async function
   if ( _retry > _retries_max ) {
     throw "Maximum number of retries reached.";
   }
-  return _value;
+  return _code;
 }
 
 function
@@ -353,19 +348,21 @@ function
 }
 
 async function
-  _contract_call_static_cmdline(
+  _bytecode_runtime_get_cmdline(
     _app_opts) {
+    let
+      _code;
   try {
-    _value = 
-      await _contract_call_static.apply(
+    _code = 
+      await _bytecode_runtime_get.apply(
         null,
         _app_opts);
-    if ( _value != undefined ) {
+    if ( _code != undefined ) {
       _printf(
-        _value.toString());
+        _code.toString());
     }
     else {
-      throw "Static contract call returned undefined value."
+      throw "Bytecode runtime retrieval failed."
     }
   } catch (_error) {
     _msg_error(
@@ -373,7 +370,6 @@ async function
       1);
   }
 }
-
 
 if ( _cmdline_check(
        "bytecode-runtime-get") ) {
@@ -386,14 +382,10 @@ if ( _cmdline_check(
     retries_max,
     api_key_path,
     target_network,
-    contract_abi_path,
-    contract_bytecode_path,
-    contract_compiler_output_path,
     contract_address,
-    contract_method,
-    method_args
+    contract_bytecode_path,
   ];
-  _contract_call_static_cmdline(
+  _bytecode_runtime_get_cmdline(
     app_opts);
 }
 

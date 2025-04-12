@@ -174,7 +174,7 @@ async function
     //   }
     // }
     try {
-      _tx =
+      _code =
         await _transaction_get.apply(
           null,
           _transaction_get_opts);

@@ -82,6 +82,8 @@ function
     "";
   transaction_deployment =
     "";
+  contract_bytecode_path =
+    "";
   quiet =
     "";
 }
@@ -101,7 +103,8 @@ async function
     _chain_name,
     _target_network,
     _contract_address,
-    _transaction_deployment) {
+    _transaction_deployment,
+    _bytecode_path) {
   let
     _attempt,
     _bytecode,
@@ -112,6 +115,10 @@ async function
     _wallet_password; //,
     // _receipt,
     // _transaction_receipt_get_opts,
+  if ( _bytecode_path == undefined ) {
+    _bytecode_path =
+      "";
+  }
   if ( _contract_address == undefined ) {
     _contract_address =
       "";
@@ -160,6 +167,11 @@ async function
       else if ( _tx != undefined ) {
         _bytecode =
           _tx.data;
+	_file_write(
+          _bytecode_path,
+          _bytecode);
+	console.log(
+          _bytecode);
       }
       break
     } catch (
@@ -252,6 +264,7 @@ function
     "    <target_network>",
     "    <contract_address>",
     "    <transaction_deployment>",
+    "    <contract_bytecode_path>",
     "",
     "Args:",
     "  <quiet>                          Can be 'y' or 'n'",
@@ -268,6 +281,7 @@ function
     "                                   resides.",
     "  <contract_address>               Address of the contract",
     "  <transaction_deployment>         Contract deployment transaction.",
+    "  <contract_bytecode_path>          Where to save contract bytecode.",
     "",
     "  Options:",
     "    -h                             This help."
@@ -351,8 +365,16 @@ function
     _usage(
       1);
   }
+  if ( contract_bytecode_path == "" ) {
+    _msg_error(
+      "No contract bytecode path specified.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
 }
-
 async function
   _bytecode_creation_get_cmdline(
     _app_opts) {
@@ -396,7 +418,8 @@ if ( _cmdline_check(
     chain_name,
     target_network,
     contract_address,
-    transaction_deployment
+    transaction_deployment,
+    contract_bytecode_path
   ];
   _deployer_get_cmdline(
     app_opts);

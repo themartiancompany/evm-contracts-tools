@@ -109,6 +109,7 @@ _bytecode_creation_get_setup() {
     "${_rpc_backend}"
     "${_contract_address}"
     "${transaction_deployment}"
+    "${_bytecode_path}"
   )
 }
 

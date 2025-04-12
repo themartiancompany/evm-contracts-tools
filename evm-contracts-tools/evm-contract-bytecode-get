@@ -95,8 +95,7 @@ _bytecode_runtime_get_setup() {
 
 _bytecode_creation_get_setup() {
   local \
-    _lib \
-    _cmd
+    _lib
   _lib="$( \
     _get_lib)/evm-contracts-tools"
   _cmd="${_lib}/bytecode-creation-get"

@@ -438,7 +438,6 @@ if [[ "${bytecode_type}" == "creation" ]]; then
       1
   fi
 fi
-fi
 _show_config
 app_opts=(
   "${call_auth}"

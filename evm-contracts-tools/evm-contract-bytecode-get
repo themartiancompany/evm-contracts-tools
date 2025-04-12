@@ -187,7 +187,7 @@ _bytecode_path_auto_detect() {
 _cache_dir_auto_detect() {
   local \
     _cache_dir
-  _cache_dir="${HOME}/.cache/evm-contract-tools/bytecode"
+  _cache_dir="${HOME}/.cache/evm-contracts-tools/bytecode"
   if [[ ! -v "override_cache_dir"  ]]; then
     mkdir \
       -p \

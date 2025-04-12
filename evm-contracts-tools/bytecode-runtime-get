@@ -42,31 +42,30 @@ const
 _contract_get =
   _contract_get_module._contract_get
 
-
 function
   _global_variables() {
   app_name =
-    "evm-contract-call-static";
+    "bytecode-runtime-get";
   wallet_seed =
-    '';
+    "";
   retries_max =
-    '';
+    "";
   api_key_path =
-    '';
+    "";
   target_network =
-    '';
+    "";
   contract_address =
-    '';
+    "";
   contract_abi_path =
-    '';
+    "";
   contract_bytecode_path =
-    '';
-  contract_compiler_output_path =
-    '';
-  contract_method =
-    '';
-  method_args =
-    [];
+    "";
+  // contract_compiler_output_path =
+  //   "";
+  // contract_method =
+  //   "";
+  // method_args =
+  //   [];
   quiet =
     '';
 }
@@ -192,52 +191,35 @@ function
   _text =
     [];
   _text.push(
-    "Static call configuration:");
-  _text.push(
-    "  evm-contract-call-static configuration:");
-  _text.push(
-    "             Wallet seed: {wallet_seed}".replace(
-      "{wallet_seed}",
-      wallet_seed));
-  _text.push(
-    "             Max retries: {retries_max}".replace(
-      "{retries_max}",
-      retries_max));
-  _text.push(
-    "            API Key path: {api_key_path}".replace(
-      "{api_key_path}",
-      api_key_path));
-  _text.push(
-    "          Target network: {target_network}".replace(
-      "{target_network}",
-      target_network));
-  _text.push(
-    "            Contract ABI: {contract_abi_path}".replace(
-      "{contract_abi_path}",
-      contract_abi_path));
-  _text.push(
-    "       Contract bytecode: {contract_bytecode_path}".replace(
-      "{contract_bytecode_path}",
-      contract_bytecode_path));
-  _text.push(
-    "Contract compiler output: {contract_compiler_output_path}".replace(
-      "{contract_compiler_output_path}",
-      contract_compiler_output_path));
+    "  bytecode-runtime-get configuration:");
   _text.push(
     "        Contract address: {contract_address}".replace(
       "{contract_address}",
       contract_address));
   _text.push(
-    "         Contract method: {contract_method}".replace(
-      "{contract_method}",
-      contract_method));
-  _method_args =
-    method_args.join(
-    " ");
+    "       Contract bytecode: {contract_bytecode_path}".replace(
+      "{contract_bytecode_path}",
+      contract_bytecode_path));
   _text.push(
-    "             Method args: {method_args}".replace(
-      "{method_args}",
-      _method_args));
+    "             Max retries: {retries_max}".replace(
+      "{retries_max}",
+      retries_max));
+  _text.push(
+    "   Credentials options:");
+  _text.push(
+    "             Wallet seed: {wallet_seed}".replace(
+      "{wallet_seed}",
+      wallet_seed));
+  _text.push(
+    "            API Key path: {api_key_path}".replace(
+      "{api_key_path}",
+      api_key_path));
+  _text.push(
+    "       Network options:");
+  _text.push(
+    "          Target network: {target_network}".replace(
+      "{target_network}",
+      target_network));
   for (_line of _text)  { 
     _msg_info(
       _line);
@@ -251,21 +233,17 @@ function
     _line,
     _text;
   _text = [
-    "Execute a static call to an EVM network's contract method",
+    "Retrieves the runtime bytecode for an address.",
     "",
     "Usage:",
-    "  evm-contract-call-static",
+    "  bytecode-runtime-get",
     "    <quiet>",
     "    <wallet_seed>",
     "    <retries_max>",
     "    <api_key_path>",
     "    <target_network>",
-    "    <contract_abi_path>",
-    "    <contract_bytecode_path>",
-    "    <contract_compiler_output_path>",
     "    <contract_address>",
-    "    <contract_method>",
-    "    <method_args>",
+    "    <contract_bytecode_path>",
     "",
     "Args:",
     "  <quiet>                          Can be 'y' or 'n'",
@@ -278,13 +256,9 @@ function
     "                                   contract ABI provider service",
     "  <target_network>                 Network on which the contract",
     "                                   resides.",
-    "  <contract_abi_path>              Path of the contract ABI",
-    "  <contract_bytecode_path>         Path for the contract bytecode",
-    "  <contract_compiler_output_path>  Path for the contract compiler",
-    "                                   output path (the hardhat artifact).",
     "  <contract_address>               Address of the contract",
-    "  <contract_method>                Contract method to execute",
-    "  [method_args]                    Arguments to pass to the method",
+    "  <contract_bytecode_path>         Path in which to save",
+    "                                   the runtime bytecode.",
     "",
     "  Options:",
     "    -h                             This help."
@@ -335,28 +309,12 @@ function
           _value;
       }
       if ( _index == 7 ) {
-        contract_abi_path =
+        contract_address =
           _value;
       }
       if ( _index == 8 ) {
         contract_bytecode_path =
           _value;
-      }
-      if ( _index == 9 ) {
-        contract_compiler_output_path =
-          _value;
-      }
-      if ( _index == 10 ) {
-        contract_address =
-          _value;
-      }
-      if ( _index == 11 ) {
-        contract_method =
-          _value;
-      }
-      if ( 11 < _index ) {
-        method_args.push(
-          _value);
       }
       if ( _value == "-h" ||
            _value == "--help" ) {
@@ -366,6 +324,29 @@ function
     }
   );
   if ( contract_address == "" ) {
+    _msg_error(
+      "It is required to set a contract address.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+  if ( target_network == "" ) {
+    _msg_error(
+      "It is required to set a network.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+  if ( contract_bytecode_path == "" ) {
+    _msg_error(
+      "It is required to set a path in which to save the bytecode.",
+      0);
+    quiet =
+      "n";
     _usage(
       1);
   }
@@ -386,16 +367,16 @@ async function
     else {
       throw "Static contract call returned undefined value."
     }
-  } catch (error) {
+  } catch (_error) {
     _msg_error(
-      error,
+      _error,
       1);
   }
 }
 
 
 if ( _cmdline_check(
-       "evm-contract-call-static") ) {
+       "bytecode-runtime-get") ) {
   _global_variables();
   _cmdline_parse();
   _overrides_set();
@@ -417,7 +398,7 @@ if ( _cmdline_check(
 }
 
 module.exports = {
-  _contract_call_static:
-    _contract_call_static
+  _bytecode_runtime_get:
+    _bytecode_runtime_get
 };
 

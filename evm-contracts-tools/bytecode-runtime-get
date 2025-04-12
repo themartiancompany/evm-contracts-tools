@@ -116,27 +116,27 @@ async function
     _api_key_path,
     _target_network,
     _contract_address,
-    _contract_bytecode_path,
+    _contract_bytecode_path
     ) {
   let
+    _api_key,
     _code,
     _network_provider,
     _passed,
     _wallet_password;
+  if ( _api_key_path != "" ) {
+    _api_key =
+      _file_read(
+        _api_key_path);
+  }
+  else if ( _api_key_path == "" ) {
+    _api_key =
+      ""
+  }
   _retry =
     1;
   _wallet_password =
     "";
-  // _contract_get_opts = [
-  //   _wallet_seed,
-  //   _wallet_password,
-  //   _contract_address,
-  //   _contract_abi_path,
-  //   _contract_bytecode_path,
-  //   _contract_compiler_output_path,
-  //   _target_network,
-  //   _api_key_path,
-  // ];
   _passed = 
     false;
   while ( _retry <= _retries_max &&

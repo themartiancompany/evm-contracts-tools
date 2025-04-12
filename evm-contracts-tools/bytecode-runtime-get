@@ -152,6 +152,10 @@ async function
       if ( _code != undefined ) {
         _passed =
           true;
+        if ( quiet != "n" ) {
+          console.log(
+            _code);
+	}
       }
       else if ( _code == undefined ) {
         throw {"error": {

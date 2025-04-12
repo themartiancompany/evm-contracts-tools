@@ -35,6 +35,7 @@ DOC_FILES=\
   $(wildcard *.md)
 
 _BASH_FILES=\
+  evm-contract-bytecode-get \
   evm-contract-call \
   evm-contract-deployer-get \
   evm-contract-deployment-address \
@@ -42,6 +43,8 @@ _BASH_FILES=\
   evm-contract-deployment-versions \
   evm-contract-deployments-dir
 _NODE_FILES=\
+  bytecode-creation-get \
+  bytecode-runtime-get \
   contract-get \
   deployer-get \
   deployer-verify \

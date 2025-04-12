@@ -178,6 +178,10 @@ _bytecode_path_auto_detect() {
       "${_bytecode_dir}"
     _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
   fi
+  _set_override \
+    "bytecode" \
+    "path" \
+    "${_bytecode_path}"
 }
 
 _cache_dir_auto_detect() {

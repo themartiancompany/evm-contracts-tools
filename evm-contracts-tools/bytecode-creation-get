@@ -147,32 +147,6 @@ async function
     _transaction_deployment
   ];
   while ( _attempt <= _retries_max ) {
-    // Why not also check the transaction
-    // is indeed the one which will contain
-    // the bytecode?
-    // if ( _contract_address != "" ) {
-    //   try {
-    //     _deployer_get_opts = [
-    //       _wallet_seed,
-    //       _retries_max,
-    //       _api_key_path,
-    //       _chain_id,
-    //       _chain_name,
-    //       _target_network,
-    //       _contract_address,
-    //       _transaction_deployment
-    //      ];
-    //       _deployer =
-    //         await _deployer_get.apply(
-    //           null,
-    //           _deployer_get_opts);
-    //   } catch(
-    //       _error) {
-    //     _error_display(
-    //       _error);
-    //     throw _error;
-    //   }
-    // }
     try {
       _code =
         await _transaction_get.apply(
@@ -187,19 +161,6 @@ async function
         _bytecode =
           _tx.data;
       }
-      // _receipt =
-      //   await _transaction_receipt_get.apply(
-      //     null,
-      //     _transaction_receipt_get_opts);
-      // if ( _receipt == undefined ) {
-      //   throw { "error": {
-      //             "message":
-      //               "Undefined transaction receipt."}};
-      // }
-      // else if ( _receipt != undefined ) {
-      //   _transaction_contract =
-      //     _receipt.contractAddress.toLowerCase();
-      // }
       break
     } catch (
         _error) {

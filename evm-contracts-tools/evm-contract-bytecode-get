@@ -352,25 +352,30 @@ _show_config() {
 _globals
 _global_variables
 _libevm_global_variables
-# _libevm_app_global_variables
+_libevm_app_global_variables
 _requirements
 # shellcheck disable=SC2034
+getopts_opts="$( \
+  printf \
+    "%s" \
+    "r:S:t:" \
+    "$(_libevm_app_getopts_params_get)" \
+    "a:n:" \
+    "$(_wallet_getopts_params_get)" \
+    "W:cvh")"
 while \
   getopts \
-    'aN:w:p:s:n:k:V:r:S:W:cvh?' \
+    "${getopts_opts}" \
     arg; do
+  _wallet_getopts_case
+  _libevm_app_getopts_case
   case \
     "${arg}" in
-    a) override_call_auth="y" ;;
-    N) override_wallet_name="${OPTARG}" ;;
-    w) override_wallet_path="${OPTARG}" ;;
-    p) override_wallet_password="${OPTARG}" ;;
-    s) override_wallet_seed="${OPTARG}" ;;
-    n) override_target_network="${OPTARG}" ;;
-    k) override_api_key="${OPTARG}" ;;
-    V) override_deployer_verify="${OPTARG}" ;;
     r) override_retries_max="${OPTARG}" ;;
     S) override_rpc_selection="${OPTARG}" ;;
+    t) override_bytecode_type="${OPTARG}" ;;
+    a) override_call_auth="y" ;;
+    n) override_target_network="${OPTARG}" ;;
     W) override_cache_dir="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;

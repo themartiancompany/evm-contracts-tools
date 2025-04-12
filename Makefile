@@ -113,6 +113,9 @@ install-man:
 	$(_INSTALL_DIR) \
 	  "$(MAN_DIR)/man1"
 	rst2man \
+	  "man/evm-contract-bytecode-get.1.rst" \
+	  "$(MAN_DIR)/man1/evm-contract-bytecode-get.1"
+	rst2man \
 	  "man/evm-contract-call.1.rst" \
 	  "$(MAN_DIR)/man1/evm-contract-call.1"
 	rst2man \

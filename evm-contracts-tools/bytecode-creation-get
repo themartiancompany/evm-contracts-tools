@@ -281,7 +281,7 @@ function
     "                                   resides.",
     "  <contract_address>               Address of the contract",
     "  <transaction_deployment>         Contract deployment transaction.",
-    "  <contract_bytecode_path>          Where to save contract bytecode.",
+    "  <contract_bytecode_path>         Where to save contract bytecode.",
     "",
     "  Options:",
     "    -h                             This help."
@@ -347,6 +347,10 @@ function
         transaction_deployment =
           _value;
       }
+      if ( _index == 11 ) {
+        contract_bytecode_path =
+          _value;
+      }
       if ( _value == "-h" ||
            _value == "--help" ) {
         quiet =
@@ -405,7 +409,7 @@ async function
 }
 
 if ( _cmdline_check(
-       "deployer-get") ) {
+       "bytecode-creation-get") ) {
   _global_variables();
   _cmdline_parse();
   _overrides_set();
@@ -426,6 +430,6 @@ if ( _cmdline_check(
 }
 
 module.exports = {
-  _deployer_get:
-    _deployer_get
+  _bytecode_creation_get:
+    _bytecode_creation_get
 };

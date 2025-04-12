@@ -55,8 +55,9 @@ well as direct RPC addresses.
 Options
 =======
 
--V deployer_verify      Whether to verify the input
-                        address is the deployer.
+-t bytecode_type        What kind of bytecode to retrieve.
+                        It can be 'runtime' or 'creation'.
+-o bytecode_path        In which file to save the bytecode.
 -r retries_max          Maximum number of retries before
                         declaring the call failed.
 -S rpc_selection        RPC selection method. It can be
@@ -102,6 +103,7 @@ See also
 ========
 
 * evm-contract-call
+* evm-contract-deployer-get
 * evm-contract-deployment-address
 * evm-contract-deployments-dir
 * evm-contract-deployment-networks

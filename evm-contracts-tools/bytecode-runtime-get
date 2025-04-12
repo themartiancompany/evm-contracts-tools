@@ -154,7 +154,8 @@ async function
           true;
         if ( quiet == "n" ) {
           console.log(
-            type(_code));
+            typeof(
+	      _code));
 	}
       }
       else if ( _code == undefined ) {

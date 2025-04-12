@@ -364,7 +364,10 @@ async function
         _app_opts);
     if ( _code != undefined ) {
       _printf(
-        _code.toString());
+        typeof(
+          _code));
+      // _printf(
+      //   _code.toString());
     }
     else {
       throw "Bytecode runtime retrieval failed."

@@ -46,6 +46,7 @@ _global_variables() {
   bytecode_path=""
   contract_address=""
   transaction_deployment=""
+  cache_dir=""
   color=""
   quiet=""
 }
@@ -183,7 +184,7 @@ _cache_dir_auto_detect() {
   local \
     _cache_dir
   _cache_dir="${HOME}/.cache/evm-contract-tools/bytecode"
-  if [[ "${override_cache_dir}" == ""  ]]; then
+  if [[ ! -v "override_cache_dir"  ]]; then
     mkdir \
       -p \
       "${_cache_dir}"
@@ -209,7 +210,7 @@ _set_overrides() {
     color="n"
   fi
   _set_override \
-    "call" \
+    "get" \
     "date" \
     "$(_get_date_human)"
   _set_override \
@@ -353,7 +354,7 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'aN:w:p:s:n:k:V:r:S:cvh?' \
+    'aN:w:p:s:n:k:V:r:S:W:cvh?' \
     arg; do
   case \
     "${arg}" in
@@ -367,6 +368,7 @@ while \
     V) override_deployer_verify="${OPTARG}" ;;
     r) override_retries_max="${OPTARG}" ;;
     S) override_rpc_selection="${OPTARG}" ;;
+    W) override_cache_dir="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
     h|?) _set_overrides && \

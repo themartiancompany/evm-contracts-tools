@@ -419,23 +419,26 @@ if (( $# < 1 )); then
   _usage \
     1
 fi
-# if (( $# < 2 )); then
-#   _msg_error \
-#     "No deployment transaction given." \
-#     0
-#   _set_overrides
-#   _usage \
-#     1
-# fi
 if (( 0 < $# )); then
   contract_address="${1}"
 fi
 if (( 1 < $# )); then
-  _transaction_deployment="${1}"
+  transaction_deployment="${1}"
 fi
 shift \
   1
 _set_overrides
+if [[ "${bytecode_type}" == "creation" ]]; then
+  if [[ "${transaction_deployment}" == "" ]]; then
+    _msg_error \
+      "No deployment transaction given." \
+      0
+    _set_overrides
+    _usage \
+      1
+  fi
+fi
+fi
 _show_config
 app_opts=(
   "${call_auth}"

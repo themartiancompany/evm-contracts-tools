@@ -150,13 +150,13 @@ async function
         await _network_provider.getCode(
           _contract_address);
       if ( _code != undefined ) {
+        _msg_info(
+          `Bytecode length: ${_code.length}`);
+        _file_write(
+          _contract_bytecode_path,
+          _code);
         _passed =
           true;
-        if ( quiet == "n" ) {
-          console.log(
-            typeof(
-	      _code));
-	}
       }
       else if ( _code == undefined ) {
         throw {"error": {

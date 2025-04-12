@@ -170,12 +170,12 @@ _bytecode_path_auto_detect() {
   local \
     _bytecode_path
   _bytecode_path=""
-  if [[ "${bytecode_type}" == "runtime" ]]; then
+  if [[ ! -v "override_bytecode_path" ]]; then
     _bytecode_dir="${cache_dir}/${target_network}/${contract_address}"
+    _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
     mkdir \
       -p \
       "${_bytecode_dir}"
-    _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
   fi
   _set_override \
     "bytecode" \

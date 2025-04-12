@@ -269,9 +269,8 @@ Usage:
     well as directly RPC address.
 
   options:
-     -a                     Whether to perform an authenticated
-                            call.
-                            Default: ${call_auth}
+     -o <bytecode_path>     Where to save the bytecode.
+                            Default: ${bytecode_path}
      -t <bytecode_type>     What kind of bytecode to get.
                             It can be 'runtime' or 'creation'.
                             For type 'creation'
@@ -298,6 +297,9 @@ Usage:
                             Default: ${api_key}
 
   libEVM options:
+     -a                     Whether to perform an authenticated
+                            call.
+                            Default: ${call_auth}
      -n <network>           EVM network name. Accepted values
                             are all those supported by
                             evm-chains-info and RPC addresses.
@@ -358,7 +360,7 @@ _requirements
 getopts_opts="$( \
   printf \
     "%s" \
-    "r:S:t:" \
+    "t:r:S:o:" \
     "$(_libevm_app_getopts_params_get)" \
     "a:n:" \
     "$(_wallet_getopts_params_get)" \
@@ -371,23 +373,36 @@ while \
   _libevm_app_getopts_case
   case \
     "${arg}" in
-    r) override_retries_max="${OPTARG}" ;;
-    S) override_rpc_selection="${OPTARG}" ;;
-    t) override_bytecode_type="${OPTARG}" ;;
-    a) override_call_auth="y" ;;
-    n) override_target_network="${OPTARG}" ;;
-    W) override_cache_dir="${OPTARG}" ;;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
-         _usage \
-           0 ;;
-    *) _msg_error \
-         "Invalid argument '${arg}'." \
-         0 && \
-       _set_overrides && \
-       _usage \
-         1 ;;
+    t) \
+      override_bytecode_type="${OPTARG}" ;;
+    r) \
+      override_retries_max="${OPTARG}" ;;
+    S) \
+      override_rpc_selection="${OPTARG}" ;;
+    o) \
+      override_bytecode_path="${OPTARG}" ;;
+    a) \
+      override_call_auth="y" ;;
+    n) \
+      override_target_network="${OPTARG}" ;;
+    W) \
+      override_cache_dir="${OPTARG}" ;;
+    c) \
+      override_color="y" ;;
+    v) \
+      override_quiet="n" ;;
+    h) \
+      _set_overrides && \
+      _usage \
+        0 ;;
+    *) \
+      if [[ " ${getopts_opts} " != *"${arg}"* ]]; then
+        _msg_error \
+          "Invalid argument '${arg}'." \
+          0
+        _usage \
+          1
+      fi ;;
   esac
 done
 shift \

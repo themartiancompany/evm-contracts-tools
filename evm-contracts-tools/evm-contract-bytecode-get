@@ -89,7 +89,7 @@ _bytecode_runtime_get_setup() {
     "${_api_key_path}"
     "${_rpc_backend}"
     "${_contract_address}"
-    "${_contract_bytecode_path}"
+    "${_bytecode_path}"
   )
 }
 

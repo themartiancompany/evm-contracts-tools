@@ -274,6 +274,9 @@ Usage:
                             Default: ${call_auth}
      -t <bytecode_type>     What kind of bytecode to get.
                             It can be 'runtime' or 'creation'.
+                            For type 'creation'
+                            <transaction_deployment> must be
+                            specified.
                             Default: ${bytecode_type}
      -r <retries_max>       Maximum number of retries before
                             declaring the call failed.

@@ -167,10 +167,10 @@ async function
       else if ( _tx != undefined ) {
         _bytecode =
           _tx.data;
+	console.log(
+          _bytecode);
 	_file_write(
           _bytecode_path,
-          _bytecode);
-	console.log(
           _bytecode);
       }
       break
@@ -421,7 +421,7 @@ if ( _cmdline_check(
     transaction_deployment,
     contract_bytecode_path
   ];
-  _deployer_get_cmdline(
+  _bytecode_creation_get_cmdline(
     app_opts);
 }
 

@@ -59,8 +59,8 @@ _requirements() {
     "evm-chains-explorers"
   _check_cmd \
     "evm-chains-info"
-  _check_cmd \
-    'evm-contracts-abi-get'
+  # _check_cmd \
+  #   'evm-contracts-abi-get'
   _check_cmd \
     'evm-wallet'
   _check_cmd \
@@ -75,22 +75,41 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
-_bytecode_runtime_get() {
+_bytecode_runtime_get_setup() {
   local \
     _lib
   _lib="$( \
     _get_lib)/evm-contracts-tools"
-  echo \
-    "${_lib}/bytecode-runtime-get"
+  _cmd="${_lib}/bytecode-runtime-get"
+  _args+=(
+    "${quiet}"
+    "${_wallet_seed}"
+    "${_retries_max}"
+    "${_api_key_path}"
+    "${_rpc_backend}"
+    "${_contract_address}"
+    "${_contract_bytecode_path}"
+  )
 }
 
-_bytecode_creation_get() {
+_bytecode_creation_get_setup() {
   local \
-    _lib
+    _lib \
+    _cmd
   _lib="$( \
     _get_lib)/evm-contracts-tools"
-  echo \
-    "${_lib}/bytecode-creation-get"
+  _cmd="${_lib}/bytecode-creation-get"
+  _args+=(
+    "${quiet}"
+    "${_wallet_seed}"
+    "${_retries_max}"
+    "${_api_key_path}"
+    "${_chain_id}"
+    "${_chain_name}"
+    "${_rpc_backend}"
+    "${_contract_address}"
+    "${transaction_deployment}"
+  )
 }
 
 _evm_contract_bytecode_get() {
@@ -122,6 +141,11 @@ _evm_contract_bytecode_get() {
       "${_contract_address}")"
   _address_sanity_check \
     "${_contract_address}"
+  if [[ "${quiet}" == "n" ]]; then
+    _node_run_opts+=(
+      -v
+    )
+  fi
   _node_run_opts+=(
     -r
       "${_retries_max}"
@@ -129,28 +153,7 @@ _evm_contract_bytecode_get() {
   _rpc_backend_get \
     "${_network}" \
     "${_rpc_selection}"
-  _cmd="$( \
-    "_bytecode_${_bytecode_type}get")"
-  _args+=(
-    "${quiet}"
-    "${_wallet_seed}"
-    "${_retries_max}"
-    "${_api_key_path}"
-    "${_chain_id}"
-    "${_chain_name}"
-    "${_rpc_backend}"
-    "${_contract_address}"
-  )
-  if [[ "${deployer_verify}" != "" ]]; then
-    _cmd="$( \
-      _deployer_verify)"
-    _args+=(
-      "${deployer_verify}"
-    )
-  fi
-  _args+=(
-    "${_transaction_deployment}"
-  )
+  "_bytecode_${_bytecode_type}_get_setup"
   _msg=(
     "Calling '$(basename "${_cmd}")'"
     "with arguments '${_args[*]}'."

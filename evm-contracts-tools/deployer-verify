@@ -212,7 +212,7 @@ function
     _msg_info(
       _line);
   }
-  subprocess.exit(
+  process.exit(
     _exit);
 }
 

@@ -125,8 +125,8 @@ _evm_contract_bytecode_get() {
     _network="${8}" \
     _rpc_selection="${9}" \
     _bytecode_type="${10}" \
-    _contract_address="${10}" \
-    _bytecode_path="${11}" \
+    _contract_address="${11}" \
+    _bytecode_path="${12}" \
     _node_run_opts=() \
     _method_args=() \
     _cmd \
@@ -136,7 +136,7 @@ _evm_contract_bytecode_get() {
     _chain_name \
     _msg=()
   shift \
-    11
+    12
   _contract_address="$( \
     _lower \
       "${_contract_address}")"

@@ -155,7 +155,7 @@ async function
   ];
   while ( _attempt <= _retries_max ) {
     try {
-      _code =
+      _tx =
         await _transaction_get.apply(
           null,
           _transaction_get_opts);
@@ -167,8 +167,6 @@ async function
       else if ( _tx != undefined ) {
         _bytecode =
           _tx.data;
-	console.log(
-          _bytecode);
 	_file_write(
           _bytecode_path,
           _bytecode);
@@ -391,8 +389,10 @@ async function
         null,
         _app_opts);
     if ( _bytecode != undefined ) {
-      _printf(
-        _bytecode.toString());
+      _msg_info(
+        `Bytecode has length '${_bytecode.length}'`);
+      // _printf(
+      //   _bytecode.toString());
     }
     else {
       _msg =

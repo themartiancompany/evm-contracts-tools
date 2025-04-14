@@ -67,8 +67,8 @@ _requirements() {
   _check_cmd \
     'evm-contracts-abi-get'
   _check_cmd \
-    'evm-contracts-source-get' \
-    'evm-contract-source-index'
+    'evm-contract-source-get' \
+    'evm-contracts-source-index'
   _check_cmd \
     'evm-wallet'
   _check_cmd \

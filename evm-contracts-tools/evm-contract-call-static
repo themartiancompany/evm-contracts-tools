@@ -30,11 +30,11 @@ _cmdline_check =
 _error_display =
   _libcrash._error_display;
 _msg_info =
-  _libcrash._msg_info
+  _libcrash._msg_info;
 _msg_error =
-  _libcrash._msg_error
+  _libcrash._msg_error;
 _printf =
-  _libcrash._printf
+  _libcrash._printf;
 const
   _contract_get_module =
     require(

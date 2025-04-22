@@ -35,6 +35,8 @@ _msg_error =
   _libcrash._msg_error;
 _printf =
   _libcrash._printf;
+_sleep =
+  _libcrash._sleep;
 const
   _contract_get_module =
     require(
@@ -69,12 +71,6 @@ function
     [];
   quiet =
     '';
-}
-
-function
-  _delay(
-    _time) {
-  return new Promise(resolve => setTimeout(resolve, _time));
 }
 
 function
@@ -173,7 +169,7 @@ async function
       _msg_error(
         "Increasing retry and waiting 3 seconds.",
         0);
-      await _delay(
+      await _sleep(
         3000);
     }
   }

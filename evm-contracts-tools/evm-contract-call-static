@@ -65,6 +65,8 @@ function
     '';
   contract_compiler_output_path =
     '';
+  method_object =
+    '';
   contract_method =
     '';
   method_args =
@@ -109,6 +111,7 @@ async function
     _contract_abi_path,
     _contract_bytecode_path,
     _contract_compiler_output_path,
+    _method_object,
     _contract_address,
     _contract_method,
     _method_args) {
@@ -119,6 +122,10 @@ async function
     _passed,
     _value,
     _wallet_password;
+  if ( _method_object == undefined ) {
+    _method_object =
+      "";
+  }
   _retry =
     1;
   _wallet_password =
@@ -138,17 +145,23 @@ async function
   while ( _retry <= _retries_max &&
           _passed == false ) {
     try {
-      _contract =
-        await _contract_get.apply(
-          null,
-          _contract_get_opts);
-      _msg_info_contract_obtained(
-        _contract);
-      _method =
-        await _contract.getFunction(
-          _contract_method);
-      _msg_info_method_obtained(
-        _method);
+      if ( _method_object == "" ) {
+        _contract =
+          await _contract_get.apply(
+            null,
+            _contract_get_opts);
+        _msg_info_contract_obtained(
+          _contract);
+        _method =
+          await _contract.getFunction(
+            _contract_method);
+        _msg_info_method_obtained(
+          _method);
+      }
+      else if ( _method_object != "" ) {
+        _method =
+          _method_object;
+      }
       _value =
         await _method.staticCall.apply(
           null,
@@ -176,7 +189,7 @@ async function
   if ( _retry > _retries_max ) {
     throw "Maximum number of retries reached.";
   }
-  return _value;
+  return _value, _method;
 }
 
 function
@@ -404,6 +417,7 @@ if ( _cmdline_check(
     contract_abi_path,
     contract_bytecode_path,
     contract_compiler_output_path,
+    method_object,
     contract_address,
     contract_method,
     method_args

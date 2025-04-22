@@ -67,8 +67,8 @@ _requirements() {
   _check_cmd \
     'evm-contracts-abi-get'
   _check_cmd \
-    'evm-contracts-source-get' \
-    'evm-contract-source-index'
+    'evm-contract-source-get' \
+    'evm-contracts-source-index'
   _check_cmd \
     'evm-wallet'
   _check_cmd \
@@ -344,6 +344,10 @@ _set_overrides() {
     "date" \
     "$(_get_date_human)"
   _set_override \
+    "wallet" \
+    "name" \
+    "default"
+  _set_override \
     "index" \
     "retrieve" \
     "n"
@@ -400,7 +404,7 @@ _set_overrides() {
   fi
   _wallet_overrides_set \
     "evm-wallet" \
-    "default" \
+    "${wallet_name}" \
     "${call_auth}"
 }
 

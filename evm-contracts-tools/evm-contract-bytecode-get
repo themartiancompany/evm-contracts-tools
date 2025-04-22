@@ -172,11 +172,16 @@ _bytecode_path_auto_detect() {
     _bytecode_path
   _bytecode_path=""
   if [[ ! -v "override_bytecode_path" ]]; then
-    _bytecode_dir="${cache_dir}/${target_network}/${contract_address}"
-    _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
-    mkdir \
-      -p \
-      "${_bytecode_dir}"
+    if [[ "${contract_address}" != "" ]]; then
+      _bytecode_dir="${cache_dir}/${target_network}/${contract_address}"
+      _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
+      mkdir \
+        -p \
+        "${_bytecode_dir}"
+    elif [[ "${contract_address}" == "" ]]; then
+      _bytecode_dir="${cache_dir}/${target_network}/<contract_address>"
+      _bytecode_path="${_bytecode_dir}/${bytecode_type}.txt"
+    fi
   fi
   _set_override \
     "bytecode" \
@@ -273,14 +278,14 @@ Usage:
     well as directly RPC address.
 
   options:
-     -o <bytecode_path>     Where to save the bytecode.
-                            Default: ${bytecode_path}
      -t <bytecode_type>     What kind of bytecode to get.
                             It can be 'runtime' or 'creation'.
                             For type 'creation'
                             <transaction_deployment> must be
                             specified.
                             Default: ${bytecode_type}
+     -o <bytecode_path>     Where to save the bytecode.
+                            Default: ${bytecode_path}
      -r <retries_max>       Maximum number of retries before
                             declaring the call failed.
                             Default: ${retries_max}
@@ -364,7 +369,7 @@ _requirements
 getopts_opts="$( \
   printf \
     "%s" \
-    "t:r:S:o:" \
+    "t:o:r:S:" \
     "$(_libevm_app_getopts_params_get)" \
     "a:n:" \
     "$(_wallet_getopts_params_get)" \
@@ -379,12 +384,12 @@ while \
     "${arg}" in
     t) \
       override_bytecode_type="${OPTARG}" ;;
+    o) \
+      override_bytecode_path="${OPTARG}" ;;
     r) \
       override_retries_max="${OPTARG}" ;;
     S) \
       override_rpc_selection="${OPTARG}" ;;
-    o) \
-      override_bytecode_path="${OPTARG}" ;;
     a) \
       override_call_auth="y" ;;
     n) \

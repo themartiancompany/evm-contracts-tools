@@ -161,6 +161,8 @@ async function
       }
       else if ( _method_object != "" ||
                 _method_object != undefined ) {
+        console.log(
+          _method_object);
         _msg_info(
           "Re-using contract method.");
         _method =

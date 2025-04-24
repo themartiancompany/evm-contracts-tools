@@ -145,7 +145,8 @@ async function
   while ( _retry <= _retries_max &&
           _passed == false ) {
     try {
-      if ( _method_object == "" ) {
+      if ( _method_object == "" ||
+           _method_object == undefined ) {
         _contract =
           await _contract_get.apply(
             null,
@@ -171,7 +172,9 @@ async function
           true;
       }
       else if ( _value == undefined ) {
-        throw "Value undefined, static call error";
+        throw { "error": {
+                  "message":
+                    "Value undefined, static call error" } };
       }
     } catch (
         _error) {
@@ -187,9 +190,11 @@ async function
     }
   }
   if ( _retry > _retries_max ) {
-    throw "Maximum number of retries reached.";
+    throw { "error": {
+              "message":
+                "Maximum number of retries reached." } };
   }
-  return _value, _method;
+  return _value, _method_object;
 }
 
 function
@@ -393,7 +398,9 @@ async function
         _value.toString());
     }
     else {
-      throw "Static contract call returned undefined value."
+      throw { "error": {
+                "message":
+                  "Static contract call returned undefined value." } };
     }
   } catch (error) {
     _msg_error(

@@ -159,7 +159,10 @@ async function
         _msg_info_method_obtained(
           _method);
       }
-      else if ( _method_object != "" ) {
+      else if ( _method_object != "" ||
+                _method_object != undefined ) {
+        _msg_info(
+          "Re-using contract method.");
         _method =
           _method_object;
       }

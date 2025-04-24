@@ -161,8 +161,6 @@ async function
       }
       else if ( _method_object != "" ||
                 _method_object != undefined ) {
-        console.log(
-          _method_object);
         _msg_info(
           "Re-using contract method.");
         _method =
@@ -199,7 +197,10 @@ async function
               "message":
                 "Maximum number of retries reached." } };
   }
-  return _value, _method;
+  return [
+    _value,
+    _method
+  ];
 }
 
 function
@@ -393,8 +394,12 @@ function
 async function
   _contract_call_static_cmdline(
     _app_opts) {
+  let
+    _method_object,
+    _value;
   try {
-    _value = 
+    [_value,
+     _method_object] = 
       await _contract_call_static.apply(
         null,
         _app_opts);
@@ -407,10 +412,13 @@ async function
                 "message":
                   "Static contract call returned undefined value." } };
     }
-  } catch (error) {
-    _msg_error(
-      error,
-      1);
+  } catch (
+      _error) {
+      _error_display(
+        _error);
+      _msg_error(
+        "Error while running static call.",
+        1);
   }
 }
 

@@ -197,7 +197,7 @@ async function
               "message":
                 "Maximum number of retries reached." } };
   }
-  return _value, _method_object;
+  return _value, _method;
 }
 
 function

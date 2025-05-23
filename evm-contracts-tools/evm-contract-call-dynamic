@@ -37,6 +37,8 @@ _msg_error =
   _libcrash._msg_error;
 _path_join =
   _libcrash._path_join;
+_sleep =
+  _libcrash._sleep;
 const
   { ethers } =
     require(
@@ -169,13 +171,6 @@ function
     _msg,
     0);
 }
-
-function
-  _delay(
-    _time) {
-  return new Promise(resolve => setTimeout(resolve, _time));
-}
-
 
 function
   _ethers_to_wei(
@@ -400,7 +395,7 @@ async function
         _error);
       _msg_info(
         "Waiting 3 seconds before retrying.");
-      await _delay(
+      await _sleep(
         3000);
         _attempt =
           _attempt + 1;

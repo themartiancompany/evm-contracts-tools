@@ -26,10 +26,15 @@ _bin="$( \
     "$( \
       command \
         -v \
-	  "env")")"
-_lib="${_bin}/../lib"
-source \
-  "${_lib}/libcrash-bash/crash-bash"
+        "env")")"
+_lib="$( \
+  realpath \
+    "${_bin}/../lib")"
+_crash_bash="${_lib}/libcrash-bash/crash-bash"
+_sourced \
+  "${_crash_bash}" 2>/dev/null || \
+  source \
+    "${_crash_bash}"
 
 # shellcheck disable=SC2034
 _global_variables() {
@@ -91,9 +96,9 @@ _contract_address_get() {
   _contract_address="${contract_address["${_version}"]}"
   if [[ "${_contract_address}" == "" ]]; then
     _msg=(
-      "no '${_contract}' version '${_version}' contract"
+      "No '${_contract}' version '${_version}' contract"
       "deployment specified for network '${_network}'"
-      "at directory path '${_deployments}'"
+      "at directory path '${_deployments}'."
     )
     _msg_error \
       "${_msg[*]}" \

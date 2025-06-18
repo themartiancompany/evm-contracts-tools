@@ -203,6 +203,9 @@ async function
     _send_opts,
     _receipt,
     _tx;
+  _msg_value =
+    Number(
+      _msg_value);
   if ( _call_timeout == "" ) {
     _msg_info(
       "Setting timeout to '300' seconds.");

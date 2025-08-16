@@ -124,7 +124,7 @@ Returns default deployments directory for an application
 
 Usage:
 
-  $(_get "app" "name")
+  ${app_name}
     [options]
     <target_app>
 
@@ -199,8 +199,8 @@ shift \
   ))
 if (( $# < 1 )); then
   _msg=(
-    "a target application"
-    "must be specified"
+    "A target application"
+    "must be specified."
   )
   _set_overrides
   _msg_error \
@@ -209,10 +209,7 @@ if (( $# < 1 )); then
   _usage \
     1
 fi
-_set \
-  "target" \
-  "app" \
-  "${1}"
+target_app="${1}"
 _set_overrides
 _show_config
 app_opts=(

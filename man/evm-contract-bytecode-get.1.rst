@@ -31,10 +31,12 @@ Ethereum Virtual Machine (EVM) contract bytecode retrieval tool
 :Version: evm-contract-bytecode-get |version|
 :Manual section: 1
 
+
 Synopsis
 ========
 
 evm-contract-bytecode-get *[options]* *address* (*transaction_deployment*)
+
 
 Description
 ===========
@@ -45,12 +47,14 @@ given the deployment transaction.
 To obtain transaction data it uses libraries from
 EVM Transactions Tools.
 
+
 Networks
 =========
 
 All those supported by
 'evm-chains-info' as
 well as direct RPC addresses.
+
 
 Options
 =======
@@ -63,6 +67,7 @@ Options
 -S rpc_selection        RPC selection method. It can be
                         'kirsh' or 'random'.
 
+
 Credentials options
 =====================
 
@@ -73,6 +78,7 @@ Credentials options
 -t call_type            Static (read-only) or dynamic (read/write).
 -k api_key              Etherscan-like service key.
 
+
 LibEVM options
 ===============
 
@@ -82,6 +88,7 @@ LibEVM options
                         are all those supported by
                         evm-chains-info as well as RPC addresses.
 
+
 Application options
 ====================
 
@@ -89,15 +96,18 @@ Application options
 -c                      Enable color output
 -v                      Enable verbose output
 
+
 Bugs
 ====
 
 https://github.com/themartiancompany/evm-contracts-tools/-/issues
 
+
 Copyright
 =========
 
 Copyright Pellegrino Prevete. AGPL-3.0.
+
 
 See also
 ========

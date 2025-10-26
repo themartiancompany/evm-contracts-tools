@@ -31,10 +31,12 @@ Ethereum Virtual Machine-compatible Contract Caller
 :Version: evm-contract-call |version|
 :Manual section: 1
 
+
 Synopsis
 ========
 
 evm-contract-call *[options]* *address* *method* (*args*)
+
 
 Description
 ===========
@@ -47,11 +49,13 @@ communicate with blockchain networks and integrates
 natively with and depends on evm-wallet
 but it's also possible to directly provide seeds files.
 
+
 Networks
 =========
 All those supported by
 'evm-chains-info' as
 well as direct RPC addresses.
+
 
 Options
 =======
@@ -72,6 +76,7 @@ Options
 -S rpc_selection        RPC selection method. It can be
                         'kirsh' or 'random'.
 
+
 Credentials options
 =====================
 
@@ -81,6 +86,7 @@ Credentials options
 -s wallet_seed          Standard 12-words seed phrase file.
 -k api_key              Etherscan-like service key.
 
+
 LibEVM options
 ================
 
@@ -89,6 +95,7 @@ LibEVM options
                         are all those supported by
                         evm-chains-info as well as RPC addresses.
 
+
 Application options
 =====================
 
@@ -96,10 +103,12 @@ Application options
 -c                      Enable color output
 -v                      Enable verbose output
 
+
 Bugs
 ====
 
 https://github.com/themartiancompany/evm-contracts-tools/-/issues
+
 
 Copyright
 =========

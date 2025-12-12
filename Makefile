@@ -87,7 +87,11 @@ all:
 check: shellcheck
 
 shellcheck:
-	shellcheck -s bash $(_BASH_FILES)
+
+	shellcheck \
+	  -s \
+	    "bash" \
+	  $(_BASH_FILES)
 
 install: $(_INSTALL_TARGETS)
 

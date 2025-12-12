@@ -37,8 +37,10 @@ _INSTALL_EXE=\
     -vDm755
 
 DOC_FILES=\
-  $(wildcard *.rst) \
-  $(wildcard *.md)
+  $(wildcard \
+      *.rst) \
+  $(wildcard \
+      *.md)
 
 _BASH_FILES=\
   evm-contract-bytecode-get \

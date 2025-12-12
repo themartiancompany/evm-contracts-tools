@@ -69,8 +69,8 @@ make \
   install
 ```
 
-The collection has officially published on the
-the uncensorable
+The collection has been officially published
+on the the uncensorable
 [Ur](
   https://github.com/themartiancompany/ur)
 user repository and application store as

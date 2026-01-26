@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 #    ----------------------------------------------------------------------
-#    Copyright © 2024, 2025  Pellegrino Prevete
+#    Copyright © 2024, 2025, 2026  Pellegrino Prevete
 #
 #    All rights reserved
 #    ----------------------------------------------------------------------
@@ -21,13 +21,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
-        -v \
-        "env")")"
-_lib="$( \
+    "$(command \
+         -v \
+         "env")")"
+_lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
@@ -55,7 +54,7 @@ _default_deployments_dir_get() {
     _type="${2}" \
     _conf_dir
   if [[ "${_type}" == "system" ]]; then
-    _conf_dir="$( \
+    _conf_dir="$(
       _get_lib)"
   elif [[ "${_type}" == "user" ]]; then
     _conf_dir="${HOME}/.config"
@@ -73,12 +72,12 @@ _evm_contract_deployments_dir() {
   if [[ "${_app}" != "" ]]; then
     _user_level="${user_level}"
     if [[ "${_user_level}" == "n" ]]; then
-      _deployments="$( \
+      _deployments="$(
         _default_deployments_dir_get \
           "${_app}" \
           "system")"
     elif [[ "${_user_level}" == "y" ]]; then
-      _deployments="$( \
+      _deployments="$(
         _default_deployments_dir_get \
           "${_app}" \
           "user")"

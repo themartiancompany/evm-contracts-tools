@@ -21,13 +21,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
-        -v \
-        "env")")"
-_lib="$( \
+    "$(command \
+         -v \
+         "env")")"
+_lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
@@ -79,7 +78,7 @@ _evm_contract_call_type() {
   local \
     _type="${1}" \
     _lib
-  _lib="$( \
+  _lib="$(
     _get_lib)/evm-contracts-tools"
   echo \
     "${_lib}/evm-contract-call-${_type}"
@@ -90,7 +89,7 @@ _artifact_missing_reset() {
     _type="${1}" \
     _artifact \
     _msg=()
-  _artifact="$( \
+  _artifact="$(
     _get \
       "_contract" \
       "${_type}")"
@@ -169,7 +168,7 @@ _evm_contract_call() {
   _rpc_backend_get \
     "${_network}" \
     "${_rpc_selection}"
-  _cmd="$( \
+  _cmd="$(
     _evm_contract_call_type \
       "${_call_type}")"
   _artifacts_check
@@ -234,11 +233,11 @@ _contract_abi_auto_detect() {
   _compiler_output="${contract_compiler_output}"
   _abi_target="${_abi}"
   if [[ "${_abi_target}" == "" ]]; then
-     _abi_target="$( \
+     _abi_target="$(
       _default_artifact_path_get \
         "abi")"
   fi
-  _abi_dir="$( \
+  _abi_dir="$(
     dirname \
       "${_abi}")"
   if [[ ! -e "${_abi}" ]] && \
@@ -283,7 +282,7 @@ _default_artifact_path_get() {
 _contract_bytecode_auto_detect() {
   local \
     _bytecode
-  _bytecode="$( \
+  _bytecode="$(
     _default_artifact_path_get \
       "bytecode")"
   if [[ ! -e "${_bytecode}" ]]; then
@@ -299,7 +298,7 @@ _artifact_local_auto_detect() {
   local \
     _type="${1}" \
     _artifact
-  _artifact="$( \
+  _artifact="$(
     _default_artifact_path_get \
       "${_type}")"
   _set_override \
@@ -541,7 +540,7 @@ _global_variables
 _libevm_global_variables
 _requirements
 # shellcheck disable=SC2034
-getopts_opts="$( \
+getopts_opts="$(
   printf \
     "%s" \
     "t:T:I:V:u:r:S:" \

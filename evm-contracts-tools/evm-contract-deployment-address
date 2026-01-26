@@ -21,13 +21,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
-        -v \
-        "env")")"
-_lib="$( \
+    "$(command \
+         -v \
+         "env")")"
+_lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
@@ -115,7 +114,7 @@ _network_check() {
     _msg=() \
     _networks=() \
     _network_id
-  _networks+=( $( \
+  _networks+=( $(
     evm-contract-deployment-networks \
       -A \
       "${_deployments}/${_contract}")
@@ -150,7 +149,7 @@ _network_check() {
       1
   fi
   if [[ "${_target_network_id}" == "" ]]; then
-    _network_id="$( \
+    _network_id="$(
       evm-chains-info \
         -o \
           'id' \
@@ -158,7 +157,7 @@ _network_check() {
         true)"
   elif [[ "${_target_network}" == "" ]]; then
     _network_id="${_target_network_id}"
-    _target_network="$( \
+    _target_network="$(
       evm-chains-info \
         -i \
           'id' \
@@ -257,7 +256,7 @@ _evm_contract_deployment_address() {
         "${_msg[*]}" \
         1
     fi
-    _system_deployments_dir="$( \
+    _system_deployments_dir="$(
       evm-contract-deployments-dir \
         "${_target_app}")"
     if [[ "${_deployments_dir}" != "${_system_deployments_dir}" ]]; then
@@ -273,7 +272,7 @@ _evm_contract_deployment_address() {
   elif [[ "${_user_defined}" == "y" ]]; then
     _user_deployments_dir=""
     if [[ "${_target_app}" != "" ]]; then
-      _user_deployments_dir="$( \
+      _user_deployments_dir="$(
         evm-contract-deployments-dir \
           -u \
           "${_target_app}")"
@@ -292,7 +291,7 @@ _evm_contract_deployment_address() {
   if [[ "${_networks_all}" == "y" ]]; then
     _network_ids=()
     _target_networks=()
-    _target_networks+=( $( \
+    _target_networks+=( $(
       evm-contract-deployment-networks \
         -A \
         "${_deployments_dir}/${_target_contract}")
@@ -356,7 +355,7 @@ _deployments_dir_auto_detect() {
         -u
       )
     fi
-    _deployments="$( \
+    _deployments="$(
       evm-contract-deployments-dir \
         "${_evm_contracts_deployments_dir_opts[@]}" \
         "${_app}")"
@@ -397,7 +396,7 @@ _contract_version_auto_detect() {
         "${_network_id}"
       )
     elif [[ "${networks_all}" == "y" ]]; then
-      _networks+=( $( \
+      _networks+=( $(
         evm-contract-deployment-networks \
           -A \
           "${_deployments}/${_contract}")
@@ -422,7 +421,7 @@ _contract_version_auto_detect() {
         "${_msg[*]}" \
         1
     fi
-    _version="$( \
+    _version="$(
       evm-contract-deployment-versions \
         -H \
         "${_config}")"

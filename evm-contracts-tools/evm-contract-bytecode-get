@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 #    ----------------------------------------------------------------------
-#    Copyright © 2024, 2025  Pellegrino Prevete
+#    Copyright © 2024, 2025, 2026  Pellegrino Prevete
 #
 #    All rights reserved
 #    ----------------------------------------------------------------------
@@ -21,13 +21,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
-        -v \
-	  "env")")"
-_lib="$( \
+    "$(command \
+         -v \
+	 "env")")"
+_lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
@@ -79,7 +78,7 @@ _get_conf_dir_path() {
 _bytecode_runtime_get_setup() {
   local \
     _lib
-  _lib="$( \
+  _lib="$(
     _get_lib)/evm-contracts-tools"
   _cmd="${_lib}/bytecode-runtime-get"
   _args+=(
@@ -96,7 +95,7 @@ _bytecode_runtime_get_setup() {
 _bytecode_creation_get_setup() {
   local \
     _lib
-  _lib="$( \
+  _lib="$(
     _get_lib)/evm-contracts-tools"
   _cmd="${_lib}/bytecode-creation-get"
   _args+=(
@@ -137,7 +136,7 @@ _evm_contract_bytecode_get() {
     _msg=()
   shift \
     13
-  _contract_address="$( \
+  _contract_address="$(
     _lower \
       "${_contract_address}")"
   _address_sanity_check \
@@ -366,7 +365,7 @@ _libevm_global_variables
 _libevm_app_global_variables
 _requirements
 # shellcheck disable=SC2034
-getopts_opts="$( \
+getopts_opts="$(
   printf \
     "%s" \
     "t:o:r:S:" \

@@ -210,6 +210,24 @@ async function
     _send_opts,
     _receipt,
     _tx;
+  if ( typeof(
+         _price_gas) === "undefined" ||
+         _price_gas == "" ) {
+    _price_gas =
+      0;
+  }
+  if ( _price_gas == "auto" ) {
+    console.log(
+      "hello");
+  }
+  _price_gas =
+    Number(
+      _price_gas);
+  if ( typeof(
+         _msg_value) === "undefined" ) {
+    _msg_value =
+      0;
+  }
   _msg_value =
     Number(
       _msg_value);
@@ -248,15 +266,42 @@ async function
         _contract_method);
     _msg_info_method_obtained(
       _method);
+    if ( _price_gas > 0 ) {
+      _send_opts = {
+        "gasPrice":
+          _price_gas
+      };
+    }
+    else {
+      _msg =
+        "Setting no gas price.";
+      _msg_info(
+        _msg);
+    }
     if ( _msg_value > 0 ) {
       if ( _measure_unit == "ether" ) {
         _amount =
           _ethers_to_wei(
             _msg_value);
       }
+      else if ( _measure_unit == "ether" ) {
+        _amount =
+          _msg_value;
+      }
+      else if ( _measure_unit == "" ) {
+        _amount =
+          _msg_value;
+      }
+      else {
+        _msg =
+          `Unknown measure unit '${_measure_unit}'.`;
+        _msg_error(
+          _msg,
+          1);
+      }
       _send_opts = {
         "value":
-          _msg_value
+          _amount
       };
       _method_args.push(
         _send_opts);
@@ -268,8 +313,10 @@ async function
     if ( _tx == undefined ) {
       throw "Transaction response undefined."
     }
-    console.log(
-      _receipt);
+    if ( quiet == "n" ) {
+      console.log(
+        _tx);
+    }
     _receipt =
       await _tx.wait(
         1,
@@ -311,6 +358,16 @@ async function
     _contract_call_dynamic_opts,
     _wallet_path_list,
     _wallet_path;
+  if ( typeof(
+         _price_gas) === "undefined" ||
+       _price_gas == "" ) {
+    _msg =
+      "Setting no gas price.";
+    _msg_info(
+      _msg);
+    _price_gas =
+      "";
+  }
   if ( typeof(
          _retries_max) === "undefined" ||
        _retries_max == "" ) {
@@ -561,7 +618,7 @@ function
     _method_args =
       _method_args.substring(
         0,
-	_chars_max);
+        _chars_max);
   }
   _text = [
     "Dynamic call configuration:",

@@ -215,12 +215,19 @@ async function
   _send_opts =
     {};
   if ( typeof(
+         _measure_unit) === "undefined" ||
+         _measure_unit == "" ) {
+    _measure_unit =
+      "wei";
+  }
+  if ( typeof(
          _price_gas) === "undefined" ||
          _price_gas == "" ) {
     _price_gas =
       0;
   }
-  if ( _price_gas == "auto" ) {
+  if ( _price_gas == "auto" ||
+       _price_gas == "fast" ) {
     _msg =
       `Auto-detecting gas price.`;
     _msg_info(
@@ -229,7 +236,7 @@ async function
       3;
     _price_gas_transaction_get_args = [
       _target_network,
-      "rpc",
+      "fast",
       _api_key_path,
       _measure_unit,
       "", // wallet seed
@@ -442,11 +449,11 @@ async function
          _measure_unit) === undefined ||
        _measure_unit == "" ) {
     _msg =
-      "Setting measure unit to 'ether'.";
+      "Setting measure unit to 'wei'.";
     _msg_info(
       _msg);
     _measure_unit =
-      "ether";
+      "wei";
   }
   if ( typeof(
          _wallet_password) === "undefined" ||
@@ -559,7 +566,7 @@ function
   }
   if ( measure_unit == "" ) {
     measure_unit =
-      "ether";
+      "wei";
   }
 }
 
@@ -605,12 +612,12 @@ function
     "  <target-network>                 Network on which the contract",
     "                                   resides.",
     "  <price-gas>                      Gas price for the transaction.",
-    "  <msg-value>                      How much <measure_unit> attach",
+    "  <msg-value>                      How much <measure-unit> attach",
     "                                   to the transaction.",
     "                                   Default: 0",
     "  <measure-unit>                   Measure unit for the transaction",
     "                                   value. It can be 'wei' or 'ether'",
-    "                                   Default: ether",
+    `                                   Default: ${measure_unit}`,
     "  <contract-address>               Address of the contract.",
     "  <contract-abi_path>              Contract ABI path.",
     "  <contract-bytecode-path>         Path for the contract bytecode.",
@@ -655,7 +662,7 @@ function
   }
   _text = [
     "Dynamic call configuration:",
-    `            Measure unit: ${measure_unit}`,
+    `            Measure unit: ${measure-unit}`,
     `             Max retries: ${retries_max}`,
     `      Network settings:`,
     `          Target network: ${target_network}`,

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 #    ----------------------------------------------------------------------
-#    Copyright © 2024, 2025  Pellegrino Prevete
+#    Copyright © 2024, 2025, 2026  Pellegrino Prevete
 #
 #    All rights reserved
 #    ----------------------------------------------------------------------
@@ -49,6 +49,7 @@ _global_variables() {
   contract_abi=""
   contract_method=""
   method_args=()
+  price_gas=""
   measure_unit=""
   color=""
   quiet=""
@@ -140,16 +141,17 @@ _evm_contract_call() {
     _wallet_password="${5}" \
     _wallet_seed="${6}" \
     _api_key_path="${7}" \
-    _msg_value="${8}" \
-    _measure_unit="${9}" \
-    _retries_max="${10}" \
-    _network="${11}" \
-    _rpc_selection="${12}" \
-    _contract_address="${13}" \
-    _contract_abi_path="${14}" \
-    _contract_bytecode_path="${15}" \
-    _contract_compiler_output_path="${16}" \
-    _contract_method="${17}" \
+    _price_gas="${8}" \
+    _msg_value="${9}" \
+    _measure_unit="${10}" \
+    _retries_max="${11}" \
+    _network="${12}" \
+    _rpc_selection="${13}" \
+    _contract_address="${14}" \
+    _contract_abi_path="${15}" \
+    _contract_bytecode_path="${16}" \
+    _contract_compiler_output_path="${17}" \
+    _contract_method="${18}" \
     _node_run_opts=() \
     _method_args=() \
     _cmd \
@@ -157,7 +159,7 @@ _evm_contract_call() {
     _rpc_backend \
     _msg=()
   shift \
-    17
+    18
   _method_args+=(
     "$@"
   )
@@ -194,6 +196,7 @@ _evm_contract_call() {
       "${_wallet_seed}"
       "${_wallet_password}"
       "${_api_key_path}"
+      "${_price_gas}"
       "${_msg_value}"
       "${_measure_unit}"
       "${_rpc_backend}"
@@ -380,6 +383,10 @@ _set_overrides() {
     "unit" \
     "ether"
   _set_override \
+    "price" \
+    "gas" \
+    ""
+  _set_override \
     "msg" \
     "value" \
     "0"
@@ -424,8 +431,8 @@ Runs a smart contract function.
 Usage:
   ${app_name}
     [options]
-    <contract_address>
-    <contract_method>
+    <contract-address>
+    <contract-method>
     ([method_args])
 
   networks:
@@ -434,28 +441,31 @@ Usage:
     well as directly RPC address
 
   options:
-     -t <call_type>         Static or dynamic.
+     -t <call-type>         Static or dynamic.
                             Default: ${call_type}
-     -V <msg_value>         How much <measure_unit> attach to the
+     -P <price-gas>         How much <measure_unit> attach to the
+                            transaction.
+                            Default: ${price_gas}
+     -V <msg-value>         How much <measure_unit> attach to the
                             transaction.
                             Default: ${msg_value}
-     -u <measure_unit>      Measure unit for the transaction
+     -u <measure-unit>      Measure unit for the transaction
                             value. It can be 'ether' or 'wei'.
                             Default: ${measure_unit}
-     -r <retries_max>       Maximum number of retries before
+     -r <retries-max>       Maximum number of retries before
                             declaring the call failed.
                             Default: ${retries_max}
-     -T <call_timeout>      Maximum number of milliseconds before
+     -T <call-timeout>      Maximum number of milliseconds before
                             declaring the call failed.
                             Default: ${call_timeout}
-     -S <rpc_selection>     RPC selection method. It can be
+     -S <rpc-selection>     RPC selection method. It can be
                             'kirsh' or 'random'.
                             Default: ${rpc_selection}
      -A <abi>               Contract ABI path.
                             Default: ${contract_abi}
      -B <bytecode>          Contract bytecode path.
                             Default: ${contract_bytecode}
-     -C <compiler_output>   Contract compiler output
+     -C <compiler-output>   Contract compiler output
                             path (the hardhat artifact).
                             Default: ${contract_compiler_output}
      -I                     Enables retrieving contract's artifacts
@@ -463,15 +473,15 @@ Usage:
                             Default: ${index_retrieve}
 
   credentials options:
-     -N <wallet_name>       EVM wallet name.
+     -N <wallet-name>       EVM wallet name.
                             Default: ${wallet_name}
-     -w <wallet_path>       EVM wallet file path.
+     -w <wallet-path>       EVM wallet file path.
                             Default: ${wallet_path}
-     -p <wallet_path>       EVM wallet password file.
+     -p <wallet-path>       EVM wallet password file.
                             Default: ${wallet_password}
-     -s <wallet_seed>       EVM wallet seed file.
+     -s <wallet-seed>       EVM wallet seed file.
                             Default: ${wallet_seed}
-     -k <api_key>           Etherscan-like service key.
+     -k <api-key>           Etherscan-like service key.
                             Default: ${api_key}
 
   libEVM options:
@@ -521,6 +531,7 @@ _show_config() {
   _msg_info "              Wallet seed:   ${wallet_seed}"
   _msg_info "                  API key:   ${api_key}"
   _msg_info "           Wallet address:   ${wallet_address}"
+  _msg_info "                Gas price:   ${price_gas}"
   _msg_info "            Message value:   ${msg_value}"
   _msg_info "             Measure unit:   ${measure_unit}"
   _msg_info "           Target network:   ${target_network}"
@@ -543,7 +554,7 @@ _requirements
 getopts_opts="$(
   printf \
     "%s" \
-    "t:T:I:V:u:r:S:" \
+    "t:T:I:P:V:u:r:S:" \
     "A:B:C:" \
     "$(_libevm_app_getopts_params_get)" \
     "a:n:" \
@@ -557,42 +568,47 @@ while \
   _libevm_app_getopts_case
   case \
     "${arg}" in
-    t) \
+    t)
       override_call_type="${OPTARG}" ;;
-    T) \
+    T)
       override_call_timeout="${OPTARG}" ;;
-    I) \
+    I)
       override_index_retrieve="y" ;;
-    V) \
+    P)
+      override_price_gas="${OPTARG}" ;;
+    V)
       override_msg_value="${OPTARG}" ;;
-    u) \
+    u)
       override_measure_unit="${OPTARG}" ;;
-    r) \
+    r)
       override_retries_max="${OPTARG}" ;;
-    S) \
+    S)
       override_rpc_selection="${OPTARG}" ;;
-    A) \
+    A)
       override_contract_abi="${OPTARG}" ;;
-    B) \
+    B)
       override_contract_bytecode="${OPTARG}" ;;
-    C) \
+    C)
       override_contract_compiler_output="${OPTARG}" ;;
-    a) \
+    a)
       override_call_auth="y" ;;
-    n) \
+    n)
       override_target_network="${OPTARG}" ;;
-    c) \
+    c)
       override_color="y" ;;
-    v) \
+    v)
       override_quiet="n" ;;
-    h) \
+    h)
       _set_overrides && \
       _usage \
         0 ;;
-    *) \
+    *)
       if [[ " ${getopts_opts} " != *"${arg}"* ]]; then
+        _msg=(
+          "Invalid argument '${arg}'."
+        )
         _msg_error \
-          "Invalid argument '${arg}'." \
+          "${_msg[*]}" \
           0
         _usage \
           1
@@ -600,19 +616,25 @@ while \
   esac
 done
 shift \
-  $(( \
+  $((
     OPTIND - 1 ))
 if (( $# < 1 )); then
+  _msg=(
+    "No address given."
+  )
   _msg_error \
-    "No address given." \
+    "${_msg[*]}" \
     0
   _set_overrides
   _usage \
     1
 fi
 if (( $# < 2 )); then
+  _msg=(
+    "No method given."
+  )
   _msg_error \
-    "No method given." \
+    "${_msg[*]}" \
     0
   _set_overrides
   _usage \
@@ -640,6 +662,7 @@ app_opts=(
   "${wallet_seed}"
   "${api_key}"
   "${msg_value}"
+  "${price_gas}"
   "${measure_unit}"
   "${retries_max}"
   "${target_network}"

@@ -74,6 +74,8 @@ function
     "";
   api_key_path =
     "";
+  price_gas =
+    "";
   msg_value =
     "";
   measure_unit =
@@ -262,6 +264,8 @@ async function
     if ( _tx == undefined ) {
       throw "Transaction response undefined."
     }
+    console.log(
+      _receipt);
     _receipt =
       await _tx.wait(
         1,
@@ -285,6 +289,7 @@ async function
     _wallet_password,
     _api_key_path,
     _msg_value,
+    _msg,
     _measure_unit,
     _target_network,
     _contract_address,
@@ -299,8 +304,10 @@ async function
     _wallet_path_list,
     _wallet_path;
   if ( _retries_max == "" ) {
+    _msg =
+      "Setting maximum call retries to '100'.";
     _msg_info(
-      "Setting maximum call retries to '100'.");
+      _msg);
     _retries_max =
       100;
   }
@@ -308,8 +315,10 @@ async function
     Number(
       _retries_max);
   if ( _call_timeout == "" ) {
+    _msg =
+      "Setting timeout to '300' seconds.";
     _msg_info(
-      "Setting timeout to '300' seconds.");
+      _msg);
     _call_timeout =
       300000;
   }
@@ -317,8 +326,10 @@ async function
     Number(
       _call_timeout);
   if ( _msg_value == "" ) {
+    _msg =
+      "Setting transaction value '0'.";
     _msg_info(
-      "Setting transaction value '0'.");
+      _msg);
     _msg_value =
       0;
   }
@@ -326,14 +337,18 @@ async function
     Number(
       _msg_value);
   if ( _measure_unit == "" ) {
+    _msg =
+      "Setting measure unit to 'ether'.";
     _msg_info(
-      "Setting measure unit to 'ether'.");
+      _msg);
     _measure_unit =
       "ether";
   }
   if ( _wallet_password == "" ) {
+    _msg =
+      "Wallet without password.";
     _msg_info(
-      "Wallet without password.");
+      _msg);
   }
   _wallet_path =
     "";
@@ -374,14 +389,18 @@ async function
       if ( _tx == undefined ) {
         _msg_error_transaction_undefined(
           _attempt);
-	throw "Transaction undefined."
+        throw "Transaction undefined."
       }
       else if ( _tx != undefined ) {
-        console.log(
-          _tx);
+        if ( quiet == "n" ) {
+          console.log(
+            _tx);
+	}
         if ( _tx.hash != undefined ) {
+          _msg =
+            "Transaction sent.";
           _msg_info(
-            "Transaction sent.");
+            _msg);
           break;
         }
         else if ( _tx.hash == undefined ) {
@@ -399,8 +418,10 @@ async function
         _error) {
       _error_display(
         _error);
+      _msg =
+        "Waiting 3 seconds before retrying.";
       _msg_info(
-        "Waiting 3 seconds before retrying.");
+        _msg);
       await _sleep(
         3000);
         _attempt =
@@ -439,53 +460,53 @@ function
   let
     _text;
   _text = [
-    "Execute a dynamic call to an EVM network's contract method",
+    "Execute a dynamic call to an EVM network's contract method.",
     "",
     "Usage:",
     "  evm-contract-call-dynamic",
     "    <quiet>",
-    "    <retries_max>",
-    "    <call_timeout>",
-    "    <wallet_seed>",
-    "    <wallet_password>",
-    "    <api_key_path>",
-    "    <msg_value>",
-    "    <measure_unit>",
-    "    <target_network>",
-    "    <contract_address>",
-    "    <contract_abi_path>",
-    "    <contract_bytecode_path>",
-    "    <contract_compiler_output_path>",
-    "    <contract_method>",
-    "    [method_args]",
+    "    <retries-max>",
+    "    <call-timeout>",
+    "    <wallet-seed>",
+    "    <wallet-password>",
+    "    <api-key-path>",
+    "    <msg-value>",
+    "    <measure-unit>",
+    "    <target-network>",
+    "    <contract-address>",
+    "    <contract-abi_path>",
+    "    <contract-bytecode_path>",
+    "    <contract-compiler-output_path>",
+    "    <contract-method>",
+    "    [method-args]",
     "",
     "Args:",
     "  <quiet>                          Can be 'y' or 'n'",
     "                                   Default: y",
-    "  <retries_max>                    Maximum number of retries before",
+    "  <retries-max>                    Maximum number of retries before",
     "                                   failing.",
-    "  <call_timeout>                   How many milliseconds to wait for a return",
+    "  <call-timeout>                   How many milliseconds to wait for a return",
     "                                   before declaring the call failed.",
-    "  <wallet_seed>                    Path of the file containing",
+    "  <wallet-seed>                    Path of the file containing",
     "                                   the seed phrase.",
-    "  <wallet_password>                Password of the wallet.",
-    "  <api_key_path>                   Path of the API key for the",
+    "  <wallet-password>                Password of the wallet.",
+    "  <api-key-path>                   Path of the API key for the",
     "                                   contract ABI provider service.",
-    "  <target_network>                 Network on which the contract",
+    "  <target-network>                 Network on which the contract",
     "                                   resides.",
-    "  <msg_value>                      How much <measure_unit> attach",
+    "  <msg-value>                      How much <measure_unit> attach",
     "                                   transaction.",
     "                                   Default: 0",
-    "  <measure_unit>                   Measure unit for the transaction",
+    "  <measure-unit>                   Measure unit for the transaction",
     "                                   value. It can be 'wei' or 'ether'",
     "                                   Default: ether",
-    "  <contract_address>               Address of the contract.",
-    "  <contract_abi_path>              Contract ABI path.",
-    "  <contract_bytecode_path>         Path for the contract bytecode.",
-    "  <contract_compiler_output_path>  Path for the contract compiler",
+    "  <contract-address>               Address of the contract.",
+    "  <contract-abi_path>              Contract ABI path.",
+    "  <contract-bytecode-path>         Path for the contract bytecode.",
+    "  <contract-compiler-output-path>  Path for the contract compiler",
     "                                   output path (the hardhat artifact).",
-    "  <contract_method>                Contract method to execute.",
-    "  [method_args]                    Arguments to pass to the method.",
+    "  <contract-method>                Contract method to execute.",
+    "  [method-args]                    Arguments to pass to the method.",
     "",
     "  Options:",
     "    -h (--help)                    This help."
@@ -506,72 +527,39 @@ function
 function
   _config_show() {
   let
+    _chars_max,
     _line,
     _method_args,
     _text;
-  _text =
-    [];
-  _text.push(
-    "Dynamic call configuration:");
-  _text.push(
-    "             Max retries: {retries_max}".replace(
-      "{retries_max}",
-      retries_max));
-  _text.push(
-    "            Call timeout: {call_timeout}".replace(
-      "{call_timeout}",
-      call_timeout));
-  _text.push(
-    "             Wallet seed: {wallet_seed}".replace(
-      "{wallet_seed}",
-      wallet_seed));
-  _text.push(
-    "         Wallet password: {wallet_password}".replace(
-      "{wallet_password}",
-      wallet_password));
-  _text.push(
-    "            API Key path: {api_key_path}".replace(
-      "{api_key_path}",
-      api_key_path));
-  _text.push(
-    "       Transaction value: {msg_value}".replace(
-      "{msg_value}",
-      msg_value));
-  _text.push(
-    "            Measure unit: {measure_unit}".replace(
-      "{measure_unit}",
-      measure_unit));
-  _text.push(
-    "          Target network: {target_network}".replace(
-      "{target_network}",
-      target_network));
-  _text.push(
-    "        Contract address: {contract_address}".replace(
-      "{contract_address}",
-      contract_address));
-  _text.push(
-    "            Contract ABI: {contract_abi_path}".replace(
-      "{contract_abi_path}",
-      contract_abi_path));
-  _text.push(
-    "       Contract Bytecode: {contract_bytecode_path}".replace(
-      "{contract_bytecode_path}",
-      contract_bytecode_path));
-  _text.push(
-    "Contract compiler output: {contract_compiler_output_path}".replace(
-      "{contract_compiler_output_path}",
-      contract_compiler_output_path));
-  _text.push(
-    "         Contract method: {contract_method}".replace(
-      "{contract_method}",
-      contract_method));
+  _chars_max =
+    300;
   _method_args =
     method_args.join(
     " ");
-  _text.push(
-    "             Method args: {method_args}".replace(
-      "{method_args}",
-      _method_args));
+  if ( _chars_max < _method_args.length ) {
+    _method_args =
+      _method_args.substring(
+        0,
+	_chars_max);
+  }
+  _text = [
+    "Dynamic call configuration:",
+    `             Max retries: ${retries_max}`,
+    `            Call timeout: ${call_timeout}`,
+    `             Wallet seed: ${wallet_seed}`,
+    `         Wallet password: ${wallet_password}`,
+    `            API Key path: ${api_key_path}`,
+    `               Gas price: ${price_gas}`,
+    `       Transaction value: ${msg_value}`,
+    `            Measure unit: ${measure_unit}`,
+    `          Target network: ${target_network}`,
+    `        Contract address: ${contract_address}`,
+    `            Contract ABI: ${contract_abi_path}`,
+    `       Contract Bytecode: ${contract_bytecode_path}`,
+    `Contract compiler output: ${contract_compiler_output_path}`,
+    `         Contract method: ${contract_method}`,
+    `             Method args: ${_method_args}`,
+  ];
   for (_line of _text)  { 
     _msg_info(
       _line);
@@ -612,38 +600,42 @@ function
           _value;
       }
       if ( _index == 8 ) {
-        msg_value =
+        price_gas =
           _value;
       }
       if ( _index == 9 ) {
-        measure_unit =
+        msg_value =
           _value;
       }
       if ( _index == 10 ) {
-        target_network =
+        measure_unit =
           _value;
       }
       if ( _index == 11 ) {
-        contract_address =
+        target_network =
           _value;
       }
       if ( _index == 12 ) {
-        contract_abi_path =
+        contract_address =
           _value;
       }
       if ( _index == 13 ) {
-        contract_bytecode_path =
+        contract_abi_path =
           _value;
       }
       if ( _index == 14 ) {
-        contract_compiler_output_path =
+        contract_bytecode_path =
           _value;
       }
       if ( _index == 15 ) {
+        contract_compiler_output_path =
+          _value;
+      }
+      if ( _index == 16 ) {
         contract_method =
           _value;
       }
-      if ( 15 < _index ) {
+      if ( 16 < _index ) {
         method_args.push(
 	  _value);
       }
@@ -656,8 +648,10 @@ function
       }
   });
   if ( contract_address == "" ) {
+    _msg =
+      "No contract address specified.";
     _msg_error(
-      "No contract address specified.",
+      _msg,
       0);
     quiet =
       "n";
@@ -678,6 +672,7 @@ if ( _cmdline_check(
     wallet_seed,
     wallet_password,
     api_key_path,
+    price_gas,
     msg_value,
     measure_unit,
     target_network,

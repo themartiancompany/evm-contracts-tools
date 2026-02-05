@@ -191,6 +191,7 @@ async function
     _wallet_seed,
     _wallet_password,
     _api_key_path,
+    _price_gas,
     _msg_value,
     _measure_unit,
     _target_network,
@@ -205,13 +206,16 @@ async function
     _contract,
     _contract_get_opts,
     _method,
+    _msg,
     _send_opts,
     _receipt,
     _tx;
   _msg_value =
     Number(
       _msg_value);
-  if ( _call_timeout == "" ) {
+  if ( typeof(
+         _call_timeout) === "undefined" ||
+       _call_timeout == "" ) {
     _msg_info(
       "Setting timeout to '300' seconds.");
     _call_timeout =
@@ -272,8 +276,10 @@ async function
         _call_timeout);
   } catch (
       _error) {
+    _msg =
+      "Dynamic contract call crashed.";
     _msg_info(
-      "Dynamic contract call crashed.");
+      _msg);
     _error_display(
       _error)
     throw _error;
@@ -288,8 +294,8 @@ async function
     _wallet_seed,
     _wallet_password,
     _api_key_path,
+    _price_gas,
     _msg_value,
-    _msg,
     _measure_unit,
     _target_network,
     _contract_address,
@@ -297,13 +303,17 @@ async function
     _contract_bytecode_path,
     _contract_compiler_output_path,
     _contract_method,
-    _method_args) {
+    _method_args,
+    _output_file) {
   let
+    _msg,
     _tx,
     _contract_call_dynamic_opts,
     _wallet_path_list,
     _wallet_path;
-  if ( _retries_max == "" ) {
+  if ( typeof(
+         _retries_max) === "undefined" ||
+       _retries_max == "" ) {
     _msg =
       "Setting maximum call retries to '100'.";
     _msg_info(
@@ -314,7 +324,9 @@ async function
   _retries_max =
     Number(
       _retries_max);
-  if ( _call_timeout == "" ) {
+  if ( typeof(
+         _call_timeout) === "undefined" ||
+       _call_timeout == "" ) {
     _msg =
       "Setting timeout to '300' seconds.";
     _msg_info(
@@ -325,7 +337,9 @@ async function
   _call_timeout =
     Number(
       _call_timeout);
-  if ( _msg_value == "" ) {
+  if ( typeof(
+         _msg_value) === "undefined" ||
+       _msg_value == "" ) {
     _msg =
       "Setting transaction value '0'.";
     _msg_info(
@@ -336,7 +350,9 @@ async function
   _msg_value =
     Number(
       _msg_value);
-  if ( _measure_unit == "" ) {
+  if ( typeof(
+         _measure_unit) === undefined ||
+       _measure_unit == "" ) {
     _msg =
       "Setting measure unit to 'ether'.";
     _msg_info(
@@ -344,7 +360,9 @@ async function
     _measure_unit =
       "ether";
   }
-  if ( _wallet_password == "" ) {
+  if ( typeof(
+         _wallet_password) === "undefined" ||
+       _wallet_password == "" ) {
     _msg =
       "Wallet without password.";
     _msg_info(
@@ -352,7 +370,9 @@ async function
   }
   _wallet_path =
     "";
-  if ( _wallet_path == "" ) {
+  if ( typeof(
+         _wallet_path) === "undefined" ||
+       _wallet_path == "" ) {
     _wallet_path_list = [
       _dirname(
         _wallet_seed),
@@ -368,6 +388,7 @@ async function
     _wallet_seed,
     _wallet_password,
     _api_key_path,
+    _price_gas,
     _msg_value,
     _measure_unit,
     _target_network,
@@ -544,19 +565,23 @@ function
   }
   _text = [
     "Dynamic call configuration:",
+    `            Measure unit: ${measure_unit}`,
     `             Max retries: ${retries_max}`,
+    `      Network settings:`,
+    `          Target network: ${target_network}`,
+    `            API Key path: ${api_key_path}`,
     `            Call timeout: ${call_timeout}`,
+    `               Gas price: ${price_gas}`,
+    `  Credentials settings:`,
     `             Wallet seed: ${wallet_seed}`,
     `         Wallet password: ${wallet_password}`,
-    `            API Key path: ${api_key_path}`,
-    `               Gas price: ${price_gas}`,
-    `       Transaction value: ${msg_value}`,
-    `            Measure unit: ${measure_unit}`,
-    `          Target network: ${target_network}`,
+    `     Contract settings:`,
     `        Contract address: ${contract_address}`,
     `            Contract ABI: ${contract_abi_path}`,
     `       Contract Bytecode: ${contract_bytecode_path}`,
     `Contract compiler output: ${contract_compiler_output_path}`,
+    `         Call settings:`,
+    `       Transaction value: ${msg_value}`,
     `         Contract method: ${contract_method}`,
     `             Method args: ${_method_args}`,
   ];
@@ -568,6 +593,8 @@ function
 
 function
   _cmdline_parse() {
+  let
+    _msg;
   quiet =
     "y";
   process.argv.forEach(

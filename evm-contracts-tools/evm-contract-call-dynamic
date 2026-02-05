@@ -53,12 +53,17 @@ _wei_to_ether =
 _parse_units =
   _ethers.parseUnits;
 const
+  _price_gas_transaction_get_module =
+    require(
+      '../evm-wallet/price-gas-transaction-get');
+_price_gas_transaction_get =
+  _price_gas_transaction_get_module._price_gas_transaction_get;
+const
   _contract_get_module =
     require(
       './contract-get');
 _contract_get =
   _contract_get_module._contract_get;
-
 
 function
   _global_variables() {
@@ -164,14 +169,9 @@ function
   _msg_error_transaction_failed(
     _attempt) {
   let
-    _msg,
-    _template;
-  _template =
-    "Transaction failed at attempt '{_attempt}'.";
+    _msg;
   _msg =
-    _template.replaceAll(
-      "{_attempt}",
-      _attempt);
+    `Transaction failed at attempt '${_attempt}'.`;
   _msg_error(
     _msg,
     0);
@@ -206,6 +206,7 @@ async function
     _contract,
     _contract_get_opts,
     _method,
+    _price_gas_transaction_get_args,
     _msg,
     _send_opts,
     _receipt,
@@ -217,8 +218,30 @@ async function
       0;
   }
   if ( _price_gas == "auto" ) {
-    console.log(
-      "hello");
+    _msg =
+      `Auto-detecting gas price.`;
+    _msg_info(
+      _msg);
+    _price_gas_transaction_get_args = [
+      _target_network,
+      "rpc",
+      _api_key_path,
+      _measure_unit,
+      "", // wallet seed
+      "", // target address,
+      "", // output file
+      _retries_max
+    ];
+    _price_gas = await
+      _price_gas_transaction_get.apply(
+        null,
+        _price_gas_transaction_get_args);
+    _msg =
+      `Got gas price '${_price_gas}' ` +
+      `${_measure_unit} from rpc ` +
+      `'${_target_network}'.`;
+    _msg_info(
+      _msg);
   }
   _price_gas =
     Number(
@@ -267,6 +290,11 @@ async function
     _msg_info_method_obtained(
       _method);
     if ( _price_gas > 0 ) {
+      _msg =
+        `Setting gas price '${_price_gas}'` +
+        `${_measure_unit}.`;
+      _msg_info(
+        _msg);
       _send_opts = {
         "gasPrice":
           _price_gas
@@ -548,6 +576,7 @@ function
     "    <wallet-seed>",
     "    <wallet-password>",
     "    <api-key-path>",
+    "    <price-gas>",
     "    <msg-value>",
     "    <measure-unit>",
     "    <target-network>",
@@ -572,8 +601,9 @@ function
     "                                   contract ABI provider service.",
     "  <target-network>                 Network on which the contract",
     "                                   resides.",
+    "  <price-gas>                      Gas price for the transaction.",
     "  <msg-value>                      How much <measure_unit> attach",
-    "                                   transaction.",
+    "                                   to the transaction.",
     "                                   Default: 0",
     "  <measure-unit>                   Measure unit for the transaction",
     "                                   value. It can be 'wei' or 'ether'",
@@ -721,7 +751,7 @@ function
       }
       if ( 16 < _index ) {
         method_args.push(
-	  _value);
+          _value;
       }
       if ( _value == "-h" ||
            _value == "--help" ) {

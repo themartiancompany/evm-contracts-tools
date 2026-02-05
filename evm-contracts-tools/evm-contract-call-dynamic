@@ -207,6 +207,7 @@ async function
     _contract_get_opts,
     _method,
     _price_gas_transaction_get_args,
+    _price_gas_transaction_get_retries_max,
     _msg,
     _send_opts,
     _receipt,
@@ -222,6 +223,8 @@ async function
       `Auto-detecting gas price.`;
     _msg_info(
       _msg);
+    _price_gas_transaction_get_retries_max =
+      3;
     _price_gas_transaction_get_args = [
       _target_network,
       "rpc",
@@ -230,7 +233,7 @@ async function
       "", // wallet seed
       "", // target address,
       "", // output file
-      _retries_max
+      _price_gas_transaction_get_retries_max
     ];
     _price_gas = await
       _price_gas_transaction_get.apply(
@@ -751,7 +754,7 @@ function
       }
       if ( 16 < _index ) {
         method_args.push(
-          _value;
+          _value);
       }
       if ( _value == "-h" ||
            _value == "--help" ) {

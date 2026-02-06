@@ -380,7 +380,7 @@ async function
           _tx);
       }
       _gas_limit =
-        _price_gas;
+        _price_gas * 2;
       _msg =
         `Setting gas price '${_price_gas}' ` +
         `${_measure_unit}, gas limit '${_gas_limit}' ` +

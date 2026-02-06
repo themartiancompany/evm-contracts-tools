@@ -208,6 +208,7 @@ async function
     _method,
     _price_gas_transaction_get_args,
     _price_gas_transaction_get_retries_max,
+    _price_gas_transaction_get_selection_mode,
     _msg,
     _send_opts,
     _receipt,
@@ -232,11 +233,13 @@ async function
       `Auto-detecting gas price.`;
     _msg_info(
       _msg);
+    _price_gas_transaction_get_selection_mode =
+      "fast";
     _price_gas_transaction_get_retries_max =
       3;
     _price_gas_transaction_get_args = [
       _target_network,
-      "fast",
+      _price_gas_transaction_get_selection_mode,
       _api_key_path,
       _measure_unit,
       "", // wallet seed
@@ -251,7 +254,9 @@ async function
     _msg =
       `Got gas price '${_price_gas}' ` +
       `${_measure_unit} from rpc ` +
-      `'${_target_network}'.`;
+      `'${_target_network}' using ` +
+      `selection mode` +
+      `'${_price_gas_transaction_get_selection_mode}'.`;
     _msg_info(
       _msg);
   }
@@ -323,7 +328,7 @@ async function
           _ethers_to_wei(
             _msg_value);
       }
-      else if ( _measure_unit == "ether" ) {
+      else if ( _measure_unit == "wei" ) {
         _amount =
           _msg_value;
       }

@@ -210,6 +210,7 @@ async function
     _method,
     _msg,
     _eip_1559,
+    _price_gas_max,
     _price_gas_transaction_get_args,
     _price_gas_transaction_get_retries_max,
     _price_gas_transaction_get_selection_mode,
@@ -218,6 +219,8 @@ async function
     _tx;
   _eip_1559 =
     true;
+  _price_gas_max =
+    40000;
   _send_opts =
     {};
   if ( typeof(
@@ -374,8 +377,8 @@ async function
       _msg =
         `Setting gas price '${_price_gas}' ` +
         `${_measure_unit}, gas limit '${_gas_limit}' ` +
-	`'${_measure_unit}' gas fee '${_gas_fee}' ` +
-	`${_measure_unit}' and fee priority ` +
+        `'${_measure_unit}' gas fee '${_gas_fee}' ` +
+        `${_measure_unit}' and fee priority ` +
         `'${_fee_priority}' '${_measure_unit}'.`;
       _msg_info(
         _msg);
@@ -385,20 +388,52 @@ async function
           _price_gas;
       }
       else if ( _eip_1559 == true ) {
-        _gas_price_max =
+        _price_exceeding =
+          _price_gas_max < _price_gas;
+        while( _price_exceeding ) {
+          await _sleep(
+            12000);
+          _price_gas_transaction_get_args = [
+            _target_network,
+            _price_gas_transaction_get_selection_mode,
+            _api_key_path,
+            _measure_unit,
+            "",      // wallet seed
+            "",      // target address,
+            "price", // output type
+            "",      // output file
+            _price_gas_transaction_get_retries_max
+          ];
+          _price_gas = await
+            _price_gas_transaction_get.apply(
+              null,
+              _price_gas_transaction_get_args);
+          _price_gas =
+            Math.max(
+              _price_gas_max,
+              _gas_limit,
+              _gas_fee,
+              _fee_priority);
+        _price_exceeding =
+          _price_gas_max < _price_gas;
+	}
+        _price_gas_max =
           Math.max(
+            _price_gas_max,
 	    _gas_limit,
             _gas_fee,
-            _fee_priority);
-        // _tx[
-        //   "gasLimit"] =
-        //   _gas_price_max;
+            _fee_priority,
+            _price_gas,
+	  );
+        _tx[
+          "gasLimit"] =
+          _price_gas_max;
         _tx[
           "maxFeePerGas"] =
-          _gas_price_max;
+          _price_gas_max;
         _tx[
           "maxPriorityFeePerGas"] =
-          _gas_price_max;
+          _price_gas_max;
       }
       if ( quiet == "n" ) {
         console.log(
@@ -477,8 +512,11 @@ async function
           _method_args)
     }
     if ( _tx == undefined ) {
-      _msg =
-        "Transaction response undefined.";
+      _msg = {
+        "code":
+	  444444, 
+        "message":
+          "Transaction response undefined." };
       throw _msg;
     }
     if ( quiet == "n" ) {
@@ -491,12 +529,29 @@ async function
         _call_timeout);
   } catch (
       _error) {
+    if ( "code" in _error ) {
+      if ( _error["code"] == -32010 ) {
+      _msg_info(
+        _error[
+          "message"]);
+      }
+      else {
+        _msg =
+          "Unknown error."
+        _msg_error(
+          _msg,
+          0);
+      _error_display(
+        _error)
+      }
+    }
+    _msg_info(
+      _error[
+        "code"]);
     _msg =
       "Dynamic contract call crashed.";
     _msg_info(
       _msg);
-    _error_display(
-      _error)
     throw _error;
   };
   return _receipt;

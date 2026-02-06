@@ -236,7 +236,7 @@ async function
     _msg_info(
       _msg);
     _price_gas_transaction_get_selection_mode =
-      "fast";
+      "simple";
     _price_gas_transaction_get_retries_max =
       3;
     _price_gas_transaction_get_args = [

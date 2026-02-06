@@ -371,14 +371,6 @@ async function
           _msg,
           0);
       }
-      if ( quiet == "n" ) {
-        _msg =
-          "Generated transaction.";
-        _msg_info(
-          _msg);
-        console.log(
-          _tx);
-      }
       _gas_limit =
         _price_gas * 2;
       _msg =
@@ -403,7 +395,7 @@ async function
             _price_feasible_retries + 1;
           _msg =
             `Current gas price '${_price_gas}', ` +
-	    `maximum gas price '${_price_gas_max}'. ` +
+            `maximum gas price '${_price_gas_max}'. ` +
             `Waiting 30 seconds before retrying.`;
           _msg_info(
             _msg);
@@ -425,7 +417,8 @@ async function
               null,
               _price_gas_transaction_get_args);
           _gas_limit =
-            _price_gas;
+            15803479 * 12 / 10;
+          // _price_gas;
           if ( Number(_price_gas) <= _price_gas_max ) {
             _gas_fee = await
               _price_gas_transaction_get.apply(
@@ -467,19 +460,15 @@ async function
             _fee_priority,
             _price_gas,
         );
-        _tx[
-          "gasLimit"] =
-          _gas_limit;
+        // _tx[
+        //   "gasLimit"] =
+        //   _gas_limit;
         _tx[
           "maxFeePerGas"] =
           _gas_fee;
         _tx[
           "maxPriorityFeePerGas"] =
           _fee_priority;
-      }
-      if ( quiet == "n" ) {
-        console.log(
-          _tx);
       }
       if ( _msg_value > 0 ) {
         if ( _measure_unit == "ether" ) {

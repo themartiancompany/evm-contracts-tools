@@ -388,7 +388,13 @@ async function
           _price_gas;
       }
       else if ( _eip_1559 == true ) {
-        while( _price_gas_max < Number(_price_gas) ) {
+        _price_feasible_retries =
+          0;
+        _price_feasible_retries_max =
+        while( _price_gas_max < Number(_price_gas) &&
+               _price_feasible_retries <= _price_feasible_retries_max ) {
+          _price_feasible_retries =
+            _price_feasible_retries + 1;
           _msg =
             `Current gas price '${_price_gas}', ` +
 	    `maximum gas price '${_price_gas_max}'. ` +
@@ -412,15 +418,9 @@ async function
             _price_gas_transaction_get.apply(
               null,
               _price_gas_transaction_get_args);
-          _price_gas =
-            Math.max(
-              _price_gas_max,
-              _gas_limit,
-              _gas_fee,
-              _fee_priority);
           _gas_limit =
             _price_gas;
-          if ( _price_gas_max < Number(_price_gas) ) {
+          if ( Number(_price_gas) <= _price_gas_max ) {
             _gas_fee = await
               _price_gas_transaction_get.apply(
                 null,
@@ -441,24 +441,35 @@ async function
                 null,
                 _price_gas_transaction_get_args);
 	  }
-	}
+        }
+        if ( _price_feasible_retries_max < _price_feasible_retries ) {
+          _msg =
+            `Setting price to max price ` +
+            `'${_price_gas_max}'`;
+          _msg_info(
+            _msg);
+          _price_gas =
+            _price_gas_max;
+        }
+        _price_feasible_retries =
+          _price_feasible_retries + 1;
         _price_gas_max =
           Math.max(
             _price_gas_max,
-	    _gas_limit,
+            _gas_limit,
             _gas_fee,
             _fee_priority,
             _price_gas,
-	  );
+        );
         _tx[
           "gasLimit"] =
-          _price_gas_max;
+          _gas_limit;
         _tx[
           "maxFeePerGas"] =
-          _price_gas_max;
+          _gas_fee;
         _tx[
           "maxPriorityFeePerGas"] =
-          _price_gas_max;
+          _fee_priority;
       }
       if ( quiet == "n" ) {
         console.log(

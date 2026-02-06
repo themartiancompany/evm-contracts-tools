@@ -383,10 +383,10 @@ async function
         "gasLimit"] =
         _gas_limit;
       _tx[
-        "MaxFeePerGas"] =
+        "maxFeePerGas"] =
         _gas_fee;
       _tx[
-        "MaxPriorityFeePerGas"] =
+        "maxPriorityFeePerGas"] =
         _fee_priority;
       if ( quiet == "n" ) {
         console.log(

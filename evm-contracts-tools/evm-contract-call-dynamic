@@ -392,7 +392,7 @@ async function
           _price_gas_max < _price_gas;
         while( _price_exceeding ) {
           await _sleep(
-            12000);
+            30000);
           _price_gas_transaction_get_args = [
             _target_network,
             _price_gas_transaction_get_selection_mode,

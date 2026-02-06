@@ -366,9 +366,14 @@ async function
         console.log(
           _tx);
       }
+      _gas_limit =
+        _price_gas * 2;
       _msg =
-        `Setting gas limit '${_price_gas}' ` +
-        `${_measure_unit}.`;
+        `Setting gas price '${_price_gas}' ` +
+        `${_measure_unit}, gas limit '${_gas_limit}' ` +
+	`'${_measure_unit}' gas fee '${_gas_fee}' ` +
+	`${_measure_unit}' and fee priority` +
+        `'${_fee_priority}' '${_measure_unit}'.`;
       _msg_info(
         _msg);
       _tx[
@@ -376,7 +381,7 @@ async function
         _price_gas;
       _tx[
         "gasLimit"] =
-        _price_gas * 2;
+        _gas_limit;
       _tx[
         "MaxFeePerGas"] =
         _gas_fee;

@@ -667,7 +667,7 @@ function
   }
   _text = [
     "Dynamic call configuration:",
-    `            Measure unit: ${measure-unit}`,
+    `            Measure unit: ${measure_unit}`,
     `             Max retries: ${retries_max}`,
     `      Network settings:`,
     `          Target network: ${target_network}`,

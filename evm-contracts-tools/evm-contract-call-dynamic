@@ -220,7 +220,7 @@ async function
   _eip_1559 =
     true;
   _price_gas_max =
-    40000;
+    400000;
   _send_opts =
     {};
   if ( typeof(
@@ -388,9 +388,13 @@ async function
           _price_gas;
       }
       else if ( _eip_1559 == true ) {
-        _price_exceeding =
-          _price_gas_max < _price_gas;
-        while( _price_exceeding ) {
+        while( _price_gas_max < Number(_price_gas) ) {
+          _msg =
+            `Current gas price '${_price_gas}', ` +
+	    `maximum gas price '${_price_gas_max}'. ` +
+            `Waiting 12 seconds before retrying.`;
+          _msg_info(
+            _msg);
           await _sleep(
             30000);
           _price_gas_transaction_get_args = [
@@ -414,9 +418,9 @@ async function
               _gas_limit,
               _gas_fee,
               _fee_priority);
-          _price_exceeding =
-            _price_gas_max < _price_gas;
-          if ( _price_exceeding == false) {
+          _gas_limit =
+            _price_gas;
+          if ( _price_gas_max < Number(_price_gas) ) {
             _gas_fee = await
               _price_gas_transaction_get.apply(
                 null,

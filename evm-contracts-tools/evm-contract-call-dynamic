@@ -373,7 +373,7 @@ async function
           _tx);
       }
       _gas_limit =
-        _price_gas * 2;
+        _price_gas;
       _msg =
         `Setting gas price '${_price_gas}' ` +
         `${_measure_unit}, gas limit '${_gas_limit}' ` +
@@ -414,8 +414,29 @@ async function
               _gas_limit,
               _gas_fee,
               _fee_priority);
-        _price_exceeding =
-          _price_gas_max < _price_gas;
+          _price_exceeding =
+            _price_gas_max < _price_gas;
+          if ( _price_exceeding == false) {
+            _gas_fee = await
+              _price_gas_transaction_get.apply(
+                null,
+                _price_gas_transaction_get_args);
+            _price_gas_transaction_get_args = [
+              _target_network,
+              _price_gas_transaction_get_selection_mode,
+              _api_key_path,
+              _measure_unit,
+              "",         // wallet seed
+              "",         // target address,
+              "priority", // output type
+              "",         // output file
+              _price_gas_transaction_get_retries_max
+            ];
+            _fee_priority = await
+              _price_gas_transaction_get.apply(
+                null,
+                _price_gas_transaction_get_args);
+	  }
 	}
         _price_gas_max =
           Math.max(

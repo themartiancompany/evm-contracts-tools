@@ -392,7 +392,7 @@ async function
           _msg =
             `Current gas price '${_price_gas}', ` +
 	    `maximum gas price '${_price_gas_max}'. ` +
-            `Waiting 12 seconds before retrying.`;
+            `Waiting 30 seconds before retrying.`;
           _msg_info(
             _msg);
           await _sleep(

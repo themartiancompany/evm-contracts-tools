@@ -343,10 +343,6 @@ async function
       _method);
     if ( _price_gas > 0 ) {
       try {
-        if ( quiet == "n" ) {
-          console.log(
-            _fragment);
-        }
         _tx = await
           _method.populateTransaction.apply(
           null,
@@ -387,6 +383,10 @@ async function
       _tx[
         "MaxPriorityFeePerGas"] =
         _fee_priority;
+      if ( quiet == "n" ) {
+        console.log(
+          _tx);
+      }
       if ( _msg_value > 0 ) {
         if ( _measure_unit == "ether" ) {
           _amount =
@@ -414,8 +414,10 @@ async function
         // _method_args.push(
         //   _send_opts);
       }
+      console.log(
+        _method.
       _tx = await
-        _method.runner.sendTransaction(
+        _contract.runner.sendTransaction(
         _tx);
       // _tx =
       //   await _method.send.apply(

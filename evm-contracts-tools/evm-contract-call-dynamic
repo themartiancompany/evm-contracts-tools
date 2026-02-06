@@ -385,15 +385,20 @@ async function
           _price_gas;
       }
       else if ( _eip_1559 == true ) {
-        _tx[
-          "gasLimit"] =
-          _gas_limit;
+        _gas_price_max =
+          Math.max(
+	    _gas_limit,
+            _gas_fee,
+            _fee_priority);
+        // _tx[
+        //   "gasLimit"] =
+        //   _gas_price_max;
         _tx[
           "maxFeePerGas"] =
-          _gas_fee;
+          _gas_price_max;
         _tx[
           "maxPriorityFeePerGas"] =
-          _fee_priority;
+          _gas_price_max;
       }
       if ( quiet == "n" ) {
         console.log(

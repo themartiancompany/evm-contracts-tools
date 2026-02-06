@@ -414,8 +414,6 @@ async function
         // _method_args.push(
         //   _send_opts);
       }
-      console.log(
-        _method.
       _tx = await
         _contract.runner.sendTransaction(
         _tx);

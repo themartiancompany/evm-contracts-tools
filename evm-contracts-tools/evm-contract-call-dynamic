@@ -210,10 +210,13 @@ async function
     _method,
     _msg,
     _eip_1559,
+    _price_feasible_retries,
+    _price_feasible_retries_max,
     _price_gas_max,
     _price_gas_transaction_get_args,
     _price_gas_transaction_get_retries_max,
     _price_gas_transaction_get_selection_mode,
+    _retries_max,
     _send_opts,
     _receipt,
     _tx;
@@ -243,8 +246,12 @@ async function
       _msg);
     _price_gas_transaction_get_selection_mode =
       "fast";
-    _price_gas_transaction_get_retries_max =
+    _retries_max =
       3;
+    _price_feasible_retries_max =
+      _retries_max;
+    _price_gas_transaction_get_retries_max =
+      _retries_max;
     _price_gas_transaction_get_args = [
       _target_network,
       _price_gas_transaction_get_selection_mode,
@@ -390,7 +397,6 @@ async function
       else if ( _eip_1559 == true ) {
         _price_feasible_retries =
           0;
-        _price_feasible_retries_max =
         while( _price_gas_max < Number(_price_gas) &&
                _price_feasible_retries <= _price_feasible_retries_max ) {
           _price_feasible_retries =

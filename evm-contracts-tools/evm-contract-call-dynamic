@@ -217,7 +217,7 @@ async function
     _receipt,
     _tx;
   _eip_1559 =
-    false;
+    true;
   _send_opts =
     {};
   if ( typeof(
@@ -239,7 +239,7 @@ async function
     _msg_info(
       _msg);
     _price_gas_transaction_get_selection_mode =
-      "simple";
+      "fast";
     _price_gas_transaction_get_retries_max =
       3;
     _price_gas_transaction_get_args = [
@@ -375,7 +375,7 @@ async function
         `Setting gas price '${_price_gas}' ` +
         `${_measure_unit}, gas limit '${_gas_limit}' ` +
 	`'${_measure_unit}' gas fee '${_gas_fee}' ` +
-	`${_measure_unit}' and fee priority` +
+	`${_measure_unit}' and fee priority ` +
         `'${_fee_priority}' '${_measure_unit}'.`;
       _msg_info(
         _msg);

@@ -239,13 +239,14 @@ async function
       0;
   }
   if ( _price_gas == "auto" ||
-       _price_gas == "fast" ) {
+       _price_gas == "fast" ||
+       _price_gas == "nextblock" ) {
     _msg =
       `Auto-detecting gas price.`;
     _msg_info(
       _msg);
     _price_gas_transaction_get_selection_mode =
-      "fast";
+      _price_gas;
     _retries_max =
       3;
     _price_feasible_retries_max =

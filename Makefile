@@ -111,6 +111,7 @@ build-man:
 	      "man" || \
 	true
 	mkdir \
+	  -p \
 	  "build/man"
 	cd \
 	  "man"; \

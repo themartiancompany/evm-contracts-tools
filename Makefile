@@ -148,7 +148,7 @@ install-doc:
 install-man:
 
 	cd \
-	  "man" \
+	  "man"; \
 	  make \
 	    build-man; \
 	  make \

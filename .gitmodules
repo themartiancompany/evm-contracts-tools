@@ -1,0 +1,3 @@
+[submodule "evm-contracts-tools/nodejs"]
+	path = evm-contracts-tools/nodejs
+	url = https://github.com/themartiancompany/evm-contracts-tools.js

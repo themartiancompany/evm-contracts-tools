@@ -150,8 +150,6 @@ install-man:
 	cd \
 	  "man"; \
 	  make \
-	    build-man; \
-	  make \
 	    install-man
 
 .PHONY: $(_PHONY_TARGETS)

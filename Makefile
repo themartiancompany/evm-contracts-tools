@@ -82,7 +82,7 @@ _PHONY_TARGETS=\
   $(_CHECK_TARGETS_ALL) \
   $(_INSTALL_TARGETS_ALL)
   
-all:
+all: build-scripts
 
 check: shellcheck
 
@@ -92,6 +92,31 @@ shellcheck:
 	  -s \
 	    "bash" \
 	  $(_BASH_FILES)
+
+build-scripts:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs" || \
+	true
+
+build-man:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs" || \
+	true
+	cd \
+	  "man"; \
+	make \
+	  build-man
+	mv \
+	  "man/build" \
+	  .
 
 install: $(_INSTALL_TARGETS)
 
@@ -122,16 +147,11 @@ install-doc:
 
 install-man:
 
-	$(_INSTALL_DIR) \
-	  "$(MAN_DIR)/man1"
-	rst2man \
-	  "man/evm-contract-bytecode-get.1.rst" \
-	  "$(MAN_DIR)/man1/evm-contract-bytecode-get.1"
-	rst2man \
-	  "man/evm-contract-call.1.rst" \
-	  "$(MAN_DIR)/man1/evm-contract-call.1"
-	rst2man \
-	  "man/evm-contract-deployer-get.1.rst" \
-	  "$(MAN_DIR)/man1/evm-contract-deployer-get.1"
+	cd \
+	  "man" \
+	  make \
+	    build-man; \
+	  make \
+	    install-man
 
 .PHONY: $(_PHONY_TARGETS)

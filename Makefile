@@ -118,7 +118,7 @@ build-man:
 	make \
 	  build-man
 	mv \
-	  "man/build"* \
+	  "man/build/"* \
 	  "build/man"
 
 install: $(_INSTALL_TARGETS)

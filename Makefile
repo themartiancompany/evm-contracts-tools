@@ -121,6 +121,22 @@ build-man:
 	  "man/build/"* \
 	  "build/man"
 
+build-npm:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs" || \
+	true
+	cd \
+	  "$(_PROJECT)/nodejs"; \
+	make \
+	  build-npm
+	mv \
+	  "build" \
+	  "../.."
+
 install: $(_INSTALL_TARGETS)
 
 install-scripts: $(_INSTALL_SCRIPTS_TARGETS)

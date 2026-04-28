@@ -82,7 +82,7 @@ _PHONY_TARGETS=\
   $(_CHECK_TARGETS_ALL) \
   $(_INSTALL_TARGETS_ALL)
   
-all: build-scripts
+all: build-scripts build-man
 
 check: shellcheck
 
@@ -108,15 +108,17 @@ build-man:
 	  submodule \
 	    update \
 	    --init \
-	      "$(_PROJECT)/nodejs" || \
+	      "man" || \
 	true
+	mkdir \
+	  "build/man"
 	cd \
 	  "man"; \
 	make \
 	  build-man
 	mv \
-	  "man/build" \
-	  .
+	  "man/build"* \
+	  "build/man"
 
 install: $(_INSTALL_TARGETS)
 

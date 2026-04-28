@@ -117,7 +117,7 @@ build-man:
 	  "man"; \
 	make \
 	  build-man
-	mv \
+	cp \
 	  "man/build/"* \
 	  "build/man"
 

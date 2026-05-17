@@ -441,26 +441,26 @@ Usage:
     well as directly RPC address
 
   options:
-     -t <call-type>         Static or dynamic.
+     -t <call-type>         It can be 'static' or 'dynamic'.
                             Default: ${call_type}
-     -P <price-gas>         How much <measure_unit> attach to the
-                            transaction.
-                            Default: ${price_gas}
-     -V <msg-value>         How much <measure_unit> attach to the
+
+  call options:
+     -V <msg-value>         How much <measure-unit> attach to the
                             transaction.
                             Default: ${msg_value}
      -u <measure-unit>      Measure unit for the transaction
                             value. It can be 'ether' or 'wei'.
                             Default: ${measure_unit}
+     -P <price-gas>         How much '${measure_unit}' attach to the
+                            transaction.
+                            Default: ${price_gas}
      -r <retries-max>       Maximum number of retries before
                             declaring the call failed.
                             Default: ${retries_max}
      -T <call-timeout>      Maximum number of milliseconds before
                             declaring the call failed.
                             Default: ${call_timeout}
-     -S <rpc-selection>     RPC selection method. It can be
-                            'kirsh' or 'random'.
-                            Default: ${rpc_selection}
+  contract options:
      -A <abi>               Contract ABI path.
                             Default: ${contract_abi}
      -B <bytecode>          Contract bytecode path.
@@ -477,7 +477,7 @@ Usage:
                             Default: ${wallet_name}
      -w <wallet-path>       EVM wallet file path.
                             Default: ${wallet_path}
-     -p <wallet-path>       EVM wallet password file.
+     -p <wallet-password>   EVM wallet password file.
                             Default: ${wallet_password}
      -s <wallet-seed>       EVM wallet seed file.
                             Default: ${wallet_seed}
@@ -491,6 +491,9 @@ Usage:
                             are all those supported by
                             evm-chains-info and RPC addresses.
                             Default: ${target_network}
+     -S <rpc-selection>     RPC selection method. It can be
+                            'kirsh' or 'random'.
+                            Default: ${rpc_selection}
 
      -h                     This message.
      -c                     Enable color output

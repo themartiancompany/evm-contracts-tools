@@ -445,14 +445,13 @@ Usage:
                             Default: ${call_type}
 
   call options:
-     -V <msg-value>         How much <measure-unit> attach to the
+     -V <msg-value>         How much '${measure_unit}' attach to the
                             transaction.
                             Default: ${msg_value}
      -u <measure-unit>      Measure unit for the transaction
                             value. It can be 'ether' or 'wei'.
                             Default: ${measure_unit}
-     -P <price-gas>         How much '${measure_unit}' attach to the
-                            transaction.
+     -P <price-gas>         I don't remember what this is.
                             Default: ${price_gas}
      -r <retries-max>       Maximum number of retries before
                             declaring the call failed.

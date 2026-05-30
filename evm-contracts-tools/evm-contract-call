@@ -265,7 +265,8 @@ _default_artifact_path_get() {
     _app \
     _artifact \
     _data_dir \
-    _network
+    _network \
+    _msg=()
   _network="${target_network}"
   _address="${contract_address}"
   _app="${app_name}"
@@ -276,6 +277,13 @@ _default_artifact_path_get() {
     _artifact="${_data_dir}/${_network}/${_address}.bin"
   elif [[ "${_type}" == "compiler_output" ]]; then
     _artifact="${_data_dir}/${_network}/${_address}.json"
+  else
+    _msg=(
+      "Unknown artifact type '${_type}'."
+    )
+    _msg_info \
+      "${_msg[*]}" \
+      1
   fi
   echo \
     "${_artifact}"

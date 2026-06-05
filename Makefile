@@ -145,7 +145,7 @@ install-bash-scripts:
 
 	for _file in $(_BASH_FILES); do \
 	  $(_INSTALL_EXE) \
-	    "$(_PROJECT)/$${_file}" \
+	    "$(_PROJECT)/bash/$${_file}" \
 	    "$(BIN_DIR)/$${_file}"; \
 	done
 

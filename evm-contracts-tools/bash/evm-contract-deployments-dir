@@ -72,24 +72,24 @@ _evm_contract_deployments_dir() {
   local \
     _app="${1}" \
     _user_level="${2}" \
-    _deployments \
-  _deployments=""
-  if [[ "${_app}" != "" ]]; then
-    _user_level="${user_level}"
-    if [[ "${_user_level}" == "n" ]]; then
-      _deployments="$(
-        _default_deployments_dir_get \
-          "${_app}" \
-          "system")"
-    elif [[ "${_user_level}" == "y" ]]; then
-      _deployments="$(
-        _default_deployments_dir_get \
-          "${_app}" \
-          "user")"
-    fi
+    _deployment_type \
+    _msg=()
+  if [[ "${_app}" == "" ]]; then
+    _msg=(
+      "No application given in input."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
   fi
-  echo \
-    "${_deployments}"
+  if [[ "${_user_level}" == "n" ]]; then
+    _deployment_type="system"
+  elif [[ "${_user_level}" == "y" ]]; then
+    _deployment_type="user"
+  fi
+  _default_deployments_dir_get \
+    "${_app}" \
+    "${_deployment_type}"
 }
 
 _set_overrides() {

@@ -124,13 +124,14 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
+
 Returns default deployments directory for an application
 
 Usage:
 
   ${app_name}
     [options]
-    <target_app>
+    <target-app>
 
   options:
      -u                     Returns user-level location for
@@ -140,6 +141,7 @@ Usage:
      -h                     This message.
      -c                     Enable color output
      -v                     Enable verbose output
+
 ENDUSAGETEXT
   _printf \
     '%s\n' \

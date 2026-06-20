@@ -59,6 +59,9 @@ _global_variables() {
 
 _requirements() {
   _check_cmd \
+    "evm-contract-deployment-networks" \
+    "evm-contract-tools"
+  _check_cmd \
     "evm-contract-deployments-dir" \
     "evm-contract-tools"
   _check_cmd \
@@ -74,7 +77,9 @@ _contract_address_get() {
     _version="${5}" \
     _config \
     _address \
-    _found
+    _found \
+    _net \
+    _msg=()
   _found="false"
   for _net \
     in "${_network}" \

@@ -28,16 +28,16 @@
 
 _bin="$(
   dirname \
-    "$(
-      command \
-        -v \
-        "env")")"
+    "$(command \
+         -v \
+         "env")")"
 _lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
 _sourced \
-  "${_crash_bash}" 2>/dev/null || \
+  "${_crash_bash}" \
+  2>"/dev/null" || \
   source \
     "${_crash_bash}"
 
@@ -53,7 +53,9 @@ _global_variables() {
 }
 
 _requirements() {
-  true
+  _check_cmd \
+    "find" \
+    "findutils"
 }
 
 _networks_find() {
@@ -98,13 +100,15 @@ _evm_contract_deployment_networks() {
     "${_deployment_dir}"
   if [[ "${_display_cheapest}" == "y" ]]; then
     if [[ " ${_networks[*]} " == *" 100 "* ]]; then
+      # Gnosis
       echo \
-        "100" # Gnosis
+        "100"
     fi
   elif [[ "${_display_safest}" == "y" ]]; then
     if [[ " ${_networks[*]} " == *" 1 "* ]]; then
+      # Ethereum
       echo \
-        "1" # Ethereum
+        "1"
     fi
   elif [[ "${_display_all}" == "y" ]]; then
     echo \
@@ -156,7 +160,7 @@ Returns a contract's deployment available networks
 
 Usage:
 
-  $(_get "app" "name")
+  ${app_name}
     [options]
     <deployment_dir>
 
@@ -208,9 +212,7 @@ _globals
 _global_variables
 _requirements
 _config_user_init \
-  "$(_get \
-       "app" \
-       "name")"
+  "${app_name}"
 # shellcheck disable=SC2034
 while \
   getopts \
@@ -218,26 +220,34 @@ while \
     arg; do
   case \
     "${arg}" in
-    A) override_display_all="y" ;;
-    S) override_display_safest="y" ;;
-    C) override_display_cheapest="y" ;;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
-         _usage \
-           0 ;;
-    *) _set_overrides && \
-       _msg_error \
-         "Invalid argument '${arg}'" \
-         0
-       _usage \
-         1 ;;
+    A)
+      override_display_all="y" ;;
+    S)
+      override_display_safest="y" ;;
+    C)
+      override_display_cheapest="y" ;;
+    c)
+      override_color="y" ;;
+    v)
+      override_quiet="n" ;;
+    h|?)
+      _set_overrides
+      _usage \
+        0 ;;
+    *)
+      _set_overrides
+      _msg=(
+        "Invalid argument '${arg}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        0
+      _usage \
+        1 ;;
   esac
 done
-shift \
-  $(( \
-    OPTIND - 1 \
-  ))
+shift $((
+  OPTIND - 1 ))
 if (( $# < 1 )); then
   _msg=(
     "a deployment directory"

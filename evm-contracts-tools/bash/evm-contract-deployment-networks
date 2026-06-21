@@ -208,6 +208,7 @@ _show_config() {
   _msg_info "              Display all:   ${display_all}"
   _msg_info "           Display safest:   ${display_safest}"
   _msg_info "         Display cheapest:   ${display_cheapest}"
+  _msg_info "    Deployments directory:   ${deployment_dir}"
 }
 
 _globals

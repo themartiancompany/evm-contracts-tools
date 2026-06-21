@@ -151,18 +151,19 @@ _usage() {
   local \
     _usage_text
   IFS='' \
-    read \
-      -r \
-      -d '' \
-      _usage_text << \
-        ENDUSAGETEXT || true
+  read \
+    -r \
+    -d '' \
+    _usage_text << \
+      ENDUSAGETEXT || true
+
 Returns a contract's deployment available networks
 
 Usage:
 
   ${app_name}
     [options]
-    <deployment_dir>
+    <deployment-dir>
 
   options:
      -A        Display all available networks
@@ -178,6 +179,7 @@ Usage:
      -h        This message.
      -c        Enable color output
      -v        Enable verbose output
+
 ENDUSAGETEXT
   _printf \
     '%s\n' \
@@ -250,8 +252,8 @@ shift $((
   OPTIND - 1 ))
 if (( $# < 1 )); then
   _msg=(
-    "a deployment directory"
-    "must be specified"
+    "A deployment directory"
+    "must be specified."
   )
   _set_overrides
   _msg_error \
@@ -260,10 +262,7 @@ if (( $# < 1 )); then
   _usage \
     1
 fi
-_set \
-  "deployment" \
-  "dir" \
-  "${1}"
+deployment_dir="${1}"
 _set_overrides
 _show_config
 app_opts=(

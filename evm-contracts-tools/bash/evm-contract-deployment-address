@@ -581,28 +581,42 @@ while \
     arg; do
   case \
     "${arg}" in
-    n) target_networks+=(
+    n)
+      target_networks+=(
          "${OPTARG}"
        ) ;;
-    i) network_ids+=(
+    i)
+      network_ids+=(
          "${OPTARG}"
        ) ;;
-    A) override_networks_all="y" ;;
-    a) override_target_app="${OPTARG}" ;;
-    V) override_contract_version="${OPTARG}" ;;
-    u) override_user_defined="y" ;;
-    d) override_deployments_dir="${OPTARG}" ;;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
-         _usage \
-           0 ;;
-    *) _set_overrides && \
-       _msg_error \
-         "Invalid argument '${arg}'" \
-         0
-       _usage \
-         1 ;;
+    A)
+      override_networks_all="y" ;;
+    a)
+      override_target_app="${OPTARG}" ;;
+    V)
+      override_contract_version="${OPTARG}" ;;
+    u)
+      override_user_defined="y" ;;
+    d)
+      override_deployments_dir="${OPTARG}" ;;
+    c)
+      override_color="y" ;;
+    v)
+      override_quiet="n" ;;
+    h|?)
+      _set_overrides
+      _usage \
+        0 ;;
+    *)
+      _set_overrides
+      _msg=(
+        "Invalid argument '${arg}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        0
+      _usage \
+        1 ;;
   esac
 done
 shift \

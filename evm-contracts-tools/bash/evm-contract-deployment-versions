@@ -36,7 +36,8 @@ _lib="$(
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
 _sourced \
-  "${_crash_bash}" 2>/dev/null || \
+  "${_crash_bash}" \
+  2>"/dev/null" || \
 source \
   "${_crash_bash}"
 
@@ -127,13 +128,14 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
+
 Returns available versions for contract deployments on a network
 
 Usage:
 
-  $(_get "app" "name")
+  ${app_name}
     [options]
-    <config_file>
+    <config-file>
 
   options:
      -H                     Display highest version available.
@@ -144,6 +146,7 @@ Usage:
      -h                     This message.
      -c                     Enable color output
      -v                     Enable verbose output
+
 ENDUSAGETEXT
   _printf \
     '%s\n' \
@@ -178,9 +181,7 @@ _globals
 _global_variables
 _requirements
 _config_user_init \
-  "$(_get \
-       "app" \
-       "name")"
+  "${app_name}"
 # shellcheck disable=SC2034
 while \
   getopts \
@@ -188,29 +189,34 @@ while \
     arg; do
   case \
     "${arg}" in
-    H) override_display_highest="y";;
-    L) override_display_lowest="y";;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
-         _usage \
-           0 ;;
-    *) _set_overrides && \
-       _msg_error \
-         "Invalid argument '${arg}'" \
-         0
-       _usage \
-         1 ;;
+    H)
+      override_display_highest="y";;
+    L)
+      override_display_lowest="y";;
+    c)
+      override_color="y" ;;
+    v)
+      override_quiet="n" ;;
+    h|?)
+      _set_overrides
+      _usage \
+        0 ;;
+    *)
+      _set_overrides
+      _msg_error \
+        "Invalid argument '${arg}'" \
+        0
+      _usage \
+        1 ;;
   esac
 done
 shift \
-  $(( \
-    OPTIND - 1 \
-  ))
+  $((
+    OPTIND - 1 ))
 if (( $# < 1 )); then
   _msg=(
-    "a target configuration"
-    "file must be specified"
+    "A target configuration"
+    "file must be specified."
   )
   _set_overrides
   _msg_error \
@@ -219,10 +225,7 @@ if (( $# < 1 )); then
   _usage \
     1
 fi
-_set \
-  "config" \
-  "file" \
-  "${1}"
+config_file="${1}"
 _set_overrides
 _show_config
 app_opts=(

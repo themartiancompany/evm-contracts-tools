@@ -36,9 +36,10 @@ _lib="$(
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
 _sourced \
-  "${_crash_bash}" 2>/dev/null || \
-  source \
-    "${_crash_bash}"
+  "${_crash_bash}" \
+  2>"/dev/null" || \
+source \
+  "${_crash_bash}"
 
 # shellcheck disable=SC2034
 _global_variables() {
@@ -92,7 +93,7 @@ _contract_address_get() {
   done
   if [[ "${_found}" == "false" ]]; then
     _msg=(
-      "no network '${_network}' deployment"
+      "No network '${_network}' deployment"
       "configuration for '${_contract}'"
       "found at path '${_deployments}'."
     )
@@ -178,10 +179,10 @@ _network_check() {
   if [[ "${_target_network_id}" != "" ]]; then
     if [[ "${_target_network_id}" != "${_network_id}" ]]; then
     _msg=(
-      "requested target network ID"
+      "Requested target network ID"
       "'${_target_network_id}' does"
       "not correspond to '${_target_network}'"
-      "known ID '${_network_id}'"
+      "known ID '${_network_id}'."
     )
     _msg_error \
       "${_msg[*]}" \
@@ -605,10 +606,10 @@ while \
   esac
 done
 shift \
-  $(( \
+  $((
     OPTIND - 1 \
   ))
-if (( $# < 1 )); then
+if (( ${#} < 1 )); then
   _msg=(
     "A target contract"
     "must be specified."
@@ -620,10 +621,7 @@ if (( $# < 1 )); then
   _usage \
     1
 fi
-_set \
-  "target" \
-  "contract" \
-  "${1}"
+target_contract="${1}"
 _set_overrides
 _show_config
 app_opts=(

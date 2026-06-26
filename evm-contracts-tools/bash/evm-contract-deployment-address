@@ -503,9 +503,9 @@ Returns an EVM network's contract deployment address.
 
 Usage:
 
-  $(_get "app" "name")
+  ${app_name}
     [options]
-    <target_contract>
+    <target-contract>
 
   networks:
     All those supported
@@ -513,14 +513,14 @@ Usage:
 
   options:
      -n <network>           EVM network name.
-     -i <network_id>        EVM network id.
+     -i <network-id>        EVM network id.
      -A                     Returns address for all
                             available networks.
                             Default: ${networks_all}
-     -a <target_app>        Application whose target
+     -a <target-app>        Application whose target
                             contract is part of.
                             Default: ${target_app}
-     -V <contract_version>  Contract version.
+     -V <contract-version>  Contract version.
                             Default: ${contract_version}
      -u                     Returns contract address for
                             user-defined file system

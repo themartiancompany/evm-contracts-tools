@@ -53,6 +53,7 @@ _global_variables() {
   target_contract=""
   contract_version=""
   user_defined=""
+  configuration_format=""
   deployments_dir=""
   color=""
   quiet=""
@@ -77,15 +78,34 @@ _contract_address_get() {
     _network_id="${4}" \
     _version="${5}" \
     _config \
+    _config_ext \
+    _configuration_format \
     _address \
     _found \
     _net \
     _msg=()
+  _configuration_format="bash"
+  if (( 5 < "${#}" )); then
+    _configuration_format="${6}"
+  fi
+  if [[ "${_configuration_format}" == "bash" ]]; then
+    _config_ext="sh"
+  elif [[ "${_configuration_format}" == "json" ]]; then
+    _config_ext="json"
+  else
+    _msg=(
+      "Unknown configuration format"
+      "'${_configuration_format}'."
+    )
+    _msg_error \
+      _msg \
+      1
+  fi
   _found="false"
   for _net \
     in "${_network}" \
        "${_network_id}"; do
-    _config="${_deployments}/${_contract}/${_net}/config.sh"
+    _config="${_deployments}/${_contract}/${_net}/config.${_config_ext}"
     if [[ -e "${_config}" ]]; then
       _found="true"
       break
@@ -94,7 +114,7 @@ _contract_address_get() {
   if [[ "${_found}" == "false" ]]; then
     _msg=(
       "No network '${_network}' deployment"
-      "configuration for '${_contract}'"
+      "configuration for contract '${_contract}'"
       "found at path '${_deployments}'."
     )
     _msg_error \
@@ -226,7 +246,8 @@ _evm_contract_deployment_address() {
     _target_contract="${5}" \
     _contract_version="${6}" \
     _user_defined="${7}" \
-    _deployments_dir="${8}" \
+    _configuration_format="${8}" \
+    _deployments_dir="${9}" \
     _network \
     _target_network \
     _target_networks=() \
@@ -238,7 +259,7 @@ _evm_contract_deployment_address() {
     _args=() \
     _msg=()
   shift \
-    8
+    9
   for _target_network \
     in $(seq "${_networks_amount}"); do
     _target_networks+=(
@@ -326,7 +347,8 @@ _evm_contract_deployment_address() {
       "${_target_contract}" \
       "${_target_network}" \
       "${_target_network_id}" \
-      "${_contract_version}"
+      "${_contract_version}" \
+      "${_configuration_format}"
     echo \
       "${_contract_address}"
   done
@@ -346,7 +368,8 @@ _evm_contract_deployment_address() {
       "${_target_contract}" \
       "${_target_network}" \
       "${_target_network_id}" \
-      "${_contract_version}"
+      "${_contract_version}" \
+      "${_configuration_format}"
     echo \
       "${_contract_address}"
   done
@@ -380,9 +403,12 @@ _deployments_dir_auto_detect() {
 _contract_version_auto_detect() {
   local \
     _config \
+    _config_ext \
     _contract \
     _deployments \
+    _deployments_path \
     _network \
+    _network_id \
     _version \
     _net \
     _found \
@@ -393,6 +419,11 @@ _contract_version_auto_detect() {
   _found="false"
   _network=""
   _network_id=""
+  if [[ "${_configuration_format}" == "bash" ]]; then
+    _config_ext="sh"
+  elif [[ "${_configuration_format}" == "json" ]]; then
+    _config_ext="${_configuration_format}"
+  fi
   if [[ "${_contract}" != "" ]]; then
     _deployments="${deployments_dir}"
     if (( 0 < "${networks_amount}" )); then 
@@ -401,6 +432,7 @@ _contract_version_auto_detect() {
     if (( 0 < "${network_ids_amount}" )); then 
       _network_id="${network_ids[0]}"
     fi
+    _deployments_path="${_deployments}/${_contract}"
     if [[ "${networks_all}" == "n" ]]; then
       _networks+=(
         "${_network}"
@@ -410,12 +442,12 @@ _contract_version_auto_detect() {
       _networks+=( $(
         evm-contract-deployment-networks \
           -A \
-          "${_deployments}/${_contract}")
+          "${_deployments_path}")
       )
     fi
     for _net \
       in "${_networks[@]}"; do
-      _config="${_deployments}/${_contract}/${_net}/config.sh"
+      _config="${_deployments_path}/${_net}/config.${config_ext}"
       if [[ -e "${_config}" ]]; then
         _found="true"
         break
@@ -472,6 +504,10 @@ _set_overrides() {
     "resolve" \
     "date" \
     "$(_get_date_human)"
+  _set_override \
+    "configuration" \
+    "format" \
+    "bash"
   networks_amount="${#target_networks[@]}"
   network_ids_amount="${#network_ids[@]}"
   _networks_all_auto_detect
@@ -491,6 +527,7 @@ _set_overrides() {
 # $1: exit status number.
 _usage() {
   local \
+    _exit="${1}" \
     _usage_text
   IFS='' \
     read \
@@ -530,16 +567,21 @@ Usage:
      -d                     Specify contracts deployments
                             directory path.
                             Default: ${deployments_dir}
+     -f                     Specify contracts deployments
+                            configuration format. It can be
+                            'bash' or 'json'.
+                            Default: ${configuration_format}
 
      -h                     This message.
      -c                     Enable color output
      -v                     Enable verbose output
+
 ENDUSAGETEXT
   _printf \
     '%s\n' \
     "${_usage_text}"
   exit \
-    "${1}"
+    "${_exit}"
 }
 
 _display_flags() {
@@ -559,14 +601,15 @@ _display_flags() {
 _show_config() {
   _msg_info "${app_name} configuration"
   _msg_info "             Resolve date:   ${resolve_date}"
+  _msg_info "       Target application:   ${target_app}"
+  _msg_info "          Target contract:   ${target_contract}"
+  _msg_info "         Contract version:   ${contract_version}"
   _msg_info "          Target networks:   ${target_networks[*]}"
   _msg_info "        Network Chain IDs:   ${network_ids[*]}"
   _msg_info "             All networks:   ${networks_all}"
-  _msg_info "          Target contract:   ${target_contract}"
-  _msg_info "       Target application:   ${target_app}"
-  _msg_info "         Contract version:   ${contract_version}"
   _msg_info "     User-defined address:   ${user_defined}"
   _msg_info "         Deployments path:   ${deployments_dir}"
+  _msg_info "     Configuration format:   ${configuration_format}"
 }
 
 _globals
@@ -577,7 +620,7 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
-    'n:i:Aa:V:ud:cvh?' \
+    'n:i:Aa:V:ud:f:cvh?' \
     arg; do
   case \
     "${arg}" in
@@ -599,6 +642,8 @@ while \
       override_user_defined="y" ;;
     d)
       override_deployments_dir="${OPTARG}" ;;
+    f)
+      override_configuration_format="${OPTARG}" ;;
     c)
       override_color="y" ;;
     v)
@@ -646,6 +691,7 @@ app_opts=(
   "${target_contract}"
   "${contract_version}"
   "${user_defined}"
+  "${configuration_format}"
   "${deployments_dir}"
   "${target_networks[@]}"
   "${network_ids[@]}"

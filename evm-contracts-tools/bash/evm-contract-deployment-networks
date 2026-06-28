@@ -149,6 +149,7 @@ _set_overrides() {
 # $1: exit status number.
 _usage() {
   local \
+    _exit="${1}" \
     _usage_text
   IFS='' \
   read \
@@ -185,7 +186,7 @@ ENDUSAGETEXT
     '%s\n' \
     "${_usage_text}"
   exit \
-    "${1}"
+    "${_exit}"
 }
 
 _display_flags() {

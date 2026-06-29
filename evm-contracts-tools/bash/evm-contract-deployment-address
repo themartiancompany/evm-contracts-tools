@@ -142,9 +142,11 @@ _network_check() {
     _contract="${2}" \
     _target_network="${3}" \
     _target_network_id="${4}" \
+    _error_flag \
     _msg=() \
     _networks=() \
     _network_id
+  _error_flag="false"
   _networks+=( $(
     evm-contract-deployment-networks \
       -A \
@@ -156,9 +158,8 @@ _network_check() {
         "The contract does not result deployed on"
         "'${_target_network_id}' network."
       )
-      _msg_error \
-        "${_msg[*]}" \
-        1
+      _error_flag="true"
+      break
     fi
   elif [[ "${_target_network}" != "" ]]; then
     if [[ " ${_networks[*]} " != *" ${_target_network} "* ]]; then
@@ -166,15 +167,17 @@ _network_check() {
         "The contract does not result deployed on"
         "'${_target_network}' network."
       )
-      _msg_error \
-        "${_msg[*]}" \
-        1
+      _error_flag="true"
+      break
     fi
   else
     _msg=(
       "Provide one between a target network"
       "name or ID."
     )
+    _error_flag="true"
+  fi
+  if [[ "${_error_flag}" == "true" ]]; then
     _msg_error \
       "${_msg[*]}" \
       1
@@ -214,7 +217,11 @@ _network_check() {
 _user_deployments_init() {
   local \
     _app="${1}" \
-    _evm_contract_deployments_dir_opts=()
+    _evm_contract_deployments_dir_opts=() \
+    _system_deployments
+  _system_deployments="$(
+    evm-contract-deployments-dir \
+         "${_app}")"
   mkdir \
     -p \
     "${_deployments_dir}"
@@ -223,8 +230,7 @@ _user_deployments_init() {
     "${_deployments_dir}"
   cp \
     -r \
-    "$(evm-contract-deployments-dir \
-         "${_app}")/"* \
+    "${_system_deployments}/"* \
     "${_deployments_dir}"
 }
 
@@ -423,6 +429,14 @@ _contract_version_auto_detect() {
     _config_ext="sh"
   elif [[ "${_configuration_format}" == "json" ]]; then
     _config_ext="${_configuration_format}"
+  else
+    _msg=(
+      "Unknown configuration format"
+      "'${_configuration_format}'."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
   fi
   if [[ "${_contract}" != "" ]]; then
     _deployments="${deployments_dir}"
@@ -479,8 +493,8 @@ _networks_all_auto_detect() {
   local \
     _networks_all
   _networks_all="n"
-  if (( "${networks_amount}" == "0" && \
-        "${network_ids_amount}" == "0" )); then
+  if (( "${networks_amount}" < 1 && \
+        "${network_ids_amount}" < 1 )); then
     _networks_all="y"
   fi
   _set_override \

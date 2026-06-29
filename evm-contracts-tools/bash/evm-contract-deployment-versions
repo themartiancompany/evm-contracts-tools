@@ -47,6 +47,7 @@ _global_variables() {
   config_file=""
   display_highest=""
   display_lowest=""
+  configuration_format=""
   color=""
   quiet=""
 }
@@ -56,6 +57,11 @@ _requirements() {
     "sort" \
     "coreutils"
   true
+}
+
+_json_requirements() {
+  _check_cmd \
+    "jq"
 }
 
 _evm_contract_deployment_versions() {
@@ -92,6 +98,25 @@ _evm_contract_deployment_versions() {
   fi
 }
 
+_configuration_format_check() {
+  if [[ "${_configuration_format}" == "json" ]]; then
+    _json_requirements
+  fi
+}
+
+_configuration_format_auto_detect() {
+  local \
+    _configuration_format
+  _configuration_format="bash"
+  if [[ "${config_file}" == *".json" ]]; then
+    _configuration_format="json"
+  fi
+  _set_override \
+    "configuration" \
+    "format" \
+    "${_configuration_format}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -115,6 +140,8 @@ _set_overrides() {
     "display" \
     "lowest" \
     "n"
+  _configuration_format_auto_detect
+  _configuration_format_check
 }
 
 # Show help usage, with an exit status.
@@ -142,6 +169,9 @@ Usage:
                             Default: ${display_highest}
      -L                     Display lowest version available.
                             Default: ${display_lowest}
+     -f                     Configuration format.
+                            It can be 'bash' or 'json'.
+                            Default: ${configuration_format}
 
      -h                     This message.
      -c                     Enable color output
@@ -175,6 +205,7 @@ _show_config() {
   _msg_info "       Configuration file:   ${config_file}"
   _msg_info "          Display highest:   ${display_highest}"
   _msg_info "           Display lowest:   ${display_lowest}"
+  _msg_info "     Configuration format:   ${configuration_format}"
 }
 
 _globals
@@ -185,7 +216,7 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
-    'HLcvh?' \
+    'HLf:cvh?' \
     arg; do
   case \
     "${arg}" in
@@ -193,6 +224,8 @@ while \
       override_display_highest="y";;
     L)
       override_display_lowest="y";;
+    f)
+      override_configuration_format="${OPTARG}";;
     c)
       override_color="y" ;;
     v)

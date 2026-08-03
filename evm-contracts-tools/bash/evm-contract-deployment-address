@@ -425,10 +425,10 @@ _contract_version_auto_detect() {
   _found="false"
   _network=""
   _network_id=""
-  if [[ "${_configuration_format}" == "bash" ]]; then
+  if [[ "${configuration_format}" == "bash" ]]; then
     _config_ext="sh"
-  elif [[ "${_configuration_format}" == "json" ]]; then
-    _config_ext="${_configuration_format}"
+  elif [[ "${configuration_format}" == "json" ]]; then
+    _config_ext="${configuration_format}"
   else
     _msg=(
       "Unknown configuration format"

@@ -461,7 +461,7 @@ _contract_version_auto_detect() {
     fi
     for _net \
       in "${_networks[@]}"; do
-      _config="${_deployments_path}/${_net}/config.${config_ext}"
+      _config="${_deployments_path}/${_net}/config.${_config_ext}"
       if [[ -e "${_config}" ]]; then
         _found="true"
         break

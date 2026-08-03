@@ -98,7 +98,7 @@ _contract_address_get() {
       "'${_configuration_format}'."
     )
     _msg_error \
-      _msg \
+      "${_msg[*]}" \
       1
   fi
   _found="false"

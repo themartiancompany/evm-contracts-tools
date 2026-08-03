@@ -99,7 +99,7 @@ _evm_contract_deployment_versions() {
 }
 
 _configuration_format_check() {
-  if [[ "${_configuration_format}" == "json" ]]; then
+  if [[ "${configuration_format}" == "json" ]]; then
     _json_requirements
   fi
 }

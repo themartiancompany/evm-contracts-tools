@@ -70,7 +70,7 @@ _requirements() {
     "evm-chains-info"
 }
 
-_contract_address_get() {
+_contract_abi_get() {
   local \
     _deployments="${1}" \
     _contract="${2}" \
@@ -80,6 +80,7 @@ _contract_address_get() {
     _config \
     _config_ext \
     _configuration_format \
+    _deployment_dir \
     _address \
     _found \
     _net \
@@ -105,30 +106,19 @@ _contract_address_get() {
   for _net \
     in "${_network}" \
        "${_network_id}"; do
-    _config="${_deployments}/${_contract}/${_net}/config.${_config_ext}"
-    if [[ -e "${_config}" ]]; then
+    _deployment_dir="${_deployments}/${_contract}/${_net}"
+    _contract_abi="${_deployment_dir}/${_version}/${_contract}.abi.json"
+    _config="${_deployment_dir}/config.${_config_ext}"
+    if [[ -e "${_contract_abi}" ]]; then
       _found="true"
       break
     fi
   done
   if [[ "${_found}" == "false" ]]; then
     _msg=(
-      "No network '${_network}' deployment"
-      "configuration for contract '${_contract}'"
+      "No ABI for contract '${_contract}'"
+      "on network '${_network}'"
       "found at path '${_deployments}'."
-    )
-    _msg_error \
-      "${_msg[*]}" \
-      1
-  fi
-  source \
-    "${_config}"
-  _contract_address="${contract_address["${_version}"]}"
-  if [[ "${_contract_address}" == "" ]]; then
-    _msg=(
-      "No '${_contract}' version '${_version}' contract"
-      "deployment specified for network '${_network}'"
-      "at directory path '${_deployments}'."
     )
     _msg_error \
       "${_msg[*]}" \
@@ -243,7 +233,7 @@ _user_deployments_check() {
   fi
 }
 
-_evm_contract_deployment_address() {
+_evm_contract_deployment_abi() {
   local \
     _networks_amount="${1}" \
     _network_ids_amount="${2}" \
@@ -261,7 +251,7 @@ _evm_contract_deployment_address() {
     _network_ids=() \
     _system_deployments_dir \
     _user_deployments_dir \
-    _contract_address \
+    _contract_abi \
     _args=() \
     _msg=()
   shift \
@@ -348,7 +338,7 @@ _evm_contract_deployment_address() {
       "${_target_contract}" \
       "${_target_network}" \
       "${_target_network_id}"
-    _contract_address_get \
+    _contract_abi_get \
       "${_deployments_dir}" \
       "${_target_contract}" \
       "${_target_network}" \
@@ -356,7 +346,7 @@ _evm_contract_deployment_address() {
       "${_contract_version}" \
       "${_configuration_format}"
     echo \
-      "${_contract_address}"
+      "${_contract_abi}"
   done
   for _network \
     in $(seq \
@@ -369,7 +359,7 @@ _evm_contract_deployment_address() {
       "${_target_contract}" \
       "${_target_network}" \
       "${_target_network_id}"
-    _contract_address_get \
+    _contract_abi_get \
       "${_deployments_dir}" \
       "${_target_contract}" \
       "${_target_network}" \
@@ -377,67 +367,8 @@ _evm_contract_deployment_address() {
       "${_contract_version}" \
       "${_configuration_format}"
     echo \
-      "${_contract_address}"
+      "${_contract_abi}"
   done
-}
-
-_libevm_app_check() {
-  local \
-    _app="${1}" \
-    _evm_contract_deployments_dir_opts=() \
-    _return
-  _evm_contract_deployments_dir_opts+=(
-    -u
-      "${user_defined}"
-  )
-  _target_dir="$(
-    evm-contract-deployments-dir \
-      "${_evm_contract_deployments_dir_opts[@]}" \
-      "${_app}")"
-  if [[ -d "${_target_dir}" ]]; then
-    _return="true"
-  else
-    _return="false"
-  fi
-  echo \
-    "${_return}"
-}
-
-_target_app_auto_detect() {
-  local \
-    _app \
-    _current_dir_name \
-    _libevm_app \
-    _msg=()
-  _app=""
-  _current_dir_name="$(
-    basename \
-      "${PWD}")"
-  _libevm_app="$(
-    _libevm_app_check \
-      "${_current_dir_name}")"
-  if [[ "${_libevm_app}" == "true" ]]; then
-    _app="${_current_dir_name}"
-    _msg=(
-      "No input target application,"
-      "selecting '${_app}'."
-    )
-    _msg_info \
-      "${_msg[*]}"
-  fi
-  _set_override \
-    "target" \
-    "app" \
-    "${_app}"
-  if [[ "${target_app}" == "" ]]; then
-    _msg=(
-      "No input target application."
-      "Set one using the '-a' option."
-    )
-    _msg_error \
-      "${_msg[*]}" \
-      1
-  fi
 }
 
 _deployments_dir_auto_detect() {
@@ -548,6 +479,67 @@ _contract_version_auto_detect() {
     "${_version}"
 }
 
+_libevm_app_check() {
+  local \
+    _app="${1}" \
+    _evm_contract_deployments_dir_opts=() \
+    _return
+  _evm_contract_deployments_dir_opts+=(
+    -u
+      "${user_defined}"
+  )
+  _target_dir="$(
+    evm-contract-deployments-dir \
+      "${_evm_contract_deployments_dir_opts[@]}" \
+      "${_app}")"
+  if [[ -d "${_target_dir}" ]]; then
+    _return="true"
+  else
+    _return="false"
+  fi
+  echo \
+    "${_return}"
+}
+
+_target_app_auto_detect() {
+  local \
+    _app \
+    _current_dir_name \
+    _libevm_app \
+    _msg=()
+  _app=""
+  _current_dir_name="$(
+    basename \
+      "${PWD}")"
+  _libevm_app="$(
+    _libevm_app_check \
+      "${_current_dir_name}")"
+  if [[ "${_libevm_app}" == "true" ]]; then
+    _app="${_current_dir_name}"
+    _msg=(
+      "No input target application,"
+      "selecting '${_app}'."
+    )
+    _msg_info \
+      "${_msg[*]}"
+  fi
+  _set_override \
+    "target" \
+    "app" \
+    "${_app}"
+  if [[ "${target_app}" == "" ]]; then
+    _msg=(
+      "No input target application."
+      "Set one using the '-a' option."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
+  fi
+}
+
+
+
 _networks_all_auto_detect() {
   local \
     _networks_all
@@ -606,7 +598,7 @@ _usage() {
       _usage_text << \
         ENDUSAGETEXT || true
 
-Returns an EVM network's contract deployment address.
+Returns an EVM network's contract deployment ABI.
 
 Usage:
 
@@ -766,7 +758,7 @@ app_opts=(
   "${target_networks[@]}"
   "${network_ids[@]}"
 )
-_evm_contract_deployment_address \
+_evm_contract_deployment_abi \
   "${app_opts[@]}"
 
 # vim:set sw=2 sts=-1 et:

@@ -189,12 +189,16 @@ while \
     h|?) _set_overrides && \
          _usage \
            0 ;;
-    *) _set_overrides && \
-       _msg_error \
-         "Invalid argument '${arg}'" \
-         0
-       _usage \
-         1 ;;
+    *)
+      _set_overrides
+      _msg=(
+        "Invalid argument '${arg}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        0
+      _usage \
+        1 ;;
   esac
 done
 shift \

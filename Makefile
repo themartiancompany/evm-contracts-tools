@@ -51,11 +51,15 @@ _BASH_FILES=\
   evm-contract-bytecode-get \
   evm-contract-call \
   evm-contract-deployer-get \
+  evm-contract-deployment-abi \
   evm-contract-deployment-address \
+  evm-contract-deployment-bytecode \
+  evm-contract-deployment-compiler-output \
   evm-contract-deployment-networks \
   evm-contract-deployment-versions \
   evm-contract-deployments-dir
 _NODE_FILES=\
+  address-check \
   bytecode-creation-get \
   bytecode-runtime-get \
   contract-get \

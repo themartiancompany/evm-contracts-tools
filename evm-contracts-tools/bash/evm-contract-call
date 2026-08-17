@@ -58,6 +58,8 @@ _global_variables() {
   method_args=()
   price_gas=""
   measure_unit=""
+  cache_dir=""
+  data_dir=""
   color=""
   quiet=""
 }
@@ -116,24 +118,62 @@ _artifact_missing_reset() {
   fi
 }
 
+_target_contract_get() {
+  local \
+    _target_app="${1}" \
+    _contract_address="${2}" \
+    _target_contract \
+    _address_sanity
+  _target_contract=""
+  _address_sanity="$(
+    _address_sanity_check \
+      "${contract_address}" \
+      0 \
+      2>&1)"
+  if [[ "${_address_sanity}" == "" ]]; then
+    _target_contract="$(
+      _contract_lookup_address \
+        "${target_app}" \
+        0)"
+  # else
+  fi
+  echo \
+    "${_target_contract}"
+}
+
+_target_app_get() {
+  local \
+    _contract_address="${1}" \
+    _target_app \
+    _address_sanity
+  _target_app=""
+  if [[ "${_contract_address}" != "" ]]; then
+    _address_sanity="$(
+      _address_sanity_check \
+        "${_contract_address}" \
+        0 \
+        2>&1)"
+    if [[ "${_address_sanity}" != "" ]]; then
+      _target_app="$(
+        _app_lookup_contract \
+          "${_contract_address}" \
+          0)"
+    # else
+    fi
+  fi
+  echo \
+    "${_target_app}"
+}
+
 _target_app_auto_detect() {
   local \
     _target_app \
     _address_sanity
   _target_app=""
   if [[ "${contract_address}" != "" ]]; then
-    _address_sanity="$(
-      _address_sanity_check \
-        "${contract_address}" \
-        0 \
-        2>&1)"
-    if [[ "${_address_sanity}" != "" ]]; then
-      _target_app="$(
-        _app_lookup_contract \
-          "${contract_address}" \
-          0)"
-    # elif [[ "${contract_address}" != "0x" ]]; then
-    fi
+    _target_app="$(
+      _target_app_get \
+        "${contract_address}")"
   fi
   _set_override \
     "target" \
@@ -179,11 +219,13 @@ _evm_contract_call() {
     _retries_max="${11}" \
     _network="${12}" \
     _rpc_selection="${13}" \
-    _contract_address="${14}" \
-    _contract_abi_path="${15}" \
-    _contract_bytecode_path="${16}" \
-    _contract_compiler_output_path="${17}" \
-    _contract_method="${18}" \
+    _cache_dir="${14}" \
+    _data_dir="${15}" \
+    _contract_address="${16}" \
+    _contract_abi_path="${17}" \
+    _contract_bytecode_path="${18}" \
+    _contract_compiler_output_path="${19}" \
+    _contract_method="${20}" \
     _node_run_opts=() \
     _method_args=() \
     _cmd \
@@ -191,7 +233,7 @@ _evm_contract_call() {
     _rpc_backend \
     _msg=()
   shift \
-    18
+    20
   _method_args+=(
     "$@"
   )
@@ -290,32 +332,91 @@ _contract_abi_auto_detect() {
     "${_abi}"
 }
 
-_default_artifact_path_get() {
+_artifact_type_check() {
   local \
     _type="${1}" \
-    _address \
-    _app \
-    _artifact \
-    _data_dir \
-    _network \
     _msg=()
-  _network="${target_network}"
-  _address="${contract_address}"
-  _app="${app_name}"
-  _data_dir="${HOME}/.local/share/${_app}"
-  if [[ "${_type}" == "abi" ]]; then
-    _artifact="${_data_dir}/${_network}/${_address}.abi.json"
-  elif [[ "${_type}" == "bytecode" ]]; then
-    _artifact="${_data_dir}/${_network}/${_address}.bin"
-  elif [[ "${_type}" == "compiler_output" ]]; then
-    _artifact="${_data_dir}/${_network}/${_address}.json"
-  else
+  if [[ "${_type}" != "abi" && \
+        "${_type}" != "bytecode" && \
+        "${_type}" != "compiler-output" ]]; then
     _msg=(
       "Unknown artifact type '${_type}'."
     )
-    _msg_info \
+    _msg_error \
       "${_msg[*]}" \
       1
+  fi
+  true
+}
+
+_default_artifact_path_get() {
+  local \
+    _type="${1}" \
+    _app_data_dir \
+    _network \
+    _address \
+    _app \
+    _artifact \
+    _evm_contract_deployment_artifact_opts=() \
+    _msg=()
+  if (( 1 < "${#}" )); then
+    _app_data_dir="${2}"
+  else
+    if [[ -v "_data_dir" ]]; then
+      _app_data_dir="${_data_dir}"
+    elif [[ -v "data_dir" ]]; then
+      _app_data_dir="${data_dir}"
+    fi
+  fi
+  if (( 2 < "${#}" )); then
+    _network="${3}"
+  else
+    if [[ -v "_target_network" ]]; then
+      _network="${_target_network}"
+    elif [[ -v "target_network" ]]; then
+      _network="${target_network}"
+    fi
+  fi
+  if (( 3 < "${#}" )); then
+    _address="${4}"
+  else
+    if [[ -v "_contract_address" ]]; then
+      _address="${_contract_address}"
+    elif [[ -v "contract_address" ]]; then
+      _address="${contract_address}"
+    fi
+  fi
+  if (( 4 < "${#}" )); then
+    _app="${4}"
+  else
+    if [[ -v "_target_app" ]]; then
+      _app="${_target_app}"
+    elif [[ -v "target_app" ]]; then
+      _app="${target_app}"
+    fi
+  fi
+  _type="${_type//_/-}"
+  _artifact_type_check
+  if [[ "${_app}" == "" ]]; then
+    _artifact_dir="${_data_dir}/${_network}"
+    if [[ "${_type}" == "abi" ]]; then
+      _artifact="${_artifact_dir}/${_address}.abi.json"
+    elif [[ "${_type}" == "bytecode" ]]; then
+      _artifact="${_artifact_dir}/${_address}.bin"
+    elif [[ "${_type}" == "compiler-output" ]]; then
+      _artifact="${_artifact_dir}/${_address}.json"
+    fi
+  else
+    _evm_contract_deployment_artifact_opts+=(
+      -n
+        "${_network}"
+      -a
+        "${_app}"
+    )
+    _artifact="$(
+      "evm-contract-deployment-${_type}" \
+        "${_contract_deployment_artifact_opts[@]}"
+        "${_address}")"
   fi
   echo \
     "${_artifact}"
@@ -381,17 +482,15 @@ _set_overrides() {
   elif [[ -z "${color}" ]]; then
     color="n"
   fi
+  _override_set \
+    "data" \
+    "dir" \
+    "${HOME}/.local/share/${app_name}"
+  _override_set \
+    "cache" \
+    "dir" \
+    "${HOME}/.cache/${app_name}"
   _target_app_auto_detect
-  if [[ "${contract_address}" != "" ]]; then
-    if [[ "${target_app}" == "" ]]; then
-      _sanity_enforce="1"
-    elif [[ "${target_app}" != "" ]]; then
-      _sanity_enforce="0"
-    fi
-    _address_sanity_check \
-      "${contract_address}" \
-      "${_sanity_enforce}"
-  fi
   _data_dir="${HOME}/.local/share/${app_name}"
   _set_override \
     "call" \
@@ -444,7 +543,24 @@ _set_overrides() {
     "0"
   _api_key_auto_detect \
     "${target_network}"
+  _target_address_auto_detect
+  if [[ "${target_app}" != "" ]]; then
+
+  fi
   if [[ "${contract_address}" != "" ]]; then
+    if [[ "${target_app}" == "" ]]; then
+      _sanity_enforce="1"
+      _address_sanity_check \
+        "${contract_address}" \
+        "${_sanity_enforce}" \
+        2>"/dev/null"
+    elif [[ "${target_app}" != "" ]]; then
+      _sanity_enforce="0"
+      _address_sanity_check \
+        "${contract_address}" \
+        "${_sanity_enforce}" \
+        2>"/dev/null"
+    fi
     _set_override \
       "contract" \
       "abi" \
@@ -557,6 +673,12 @@ Usage:
                               'kirsh' or 'random'.
                               Default: ${rpc_selection}
 
+  application options:
+     -W <cache-dir>           Cache directory
+                              Default: ${cache_dir}
+     -D <data-dir>            Application data directory
+                              Default: ${data_dir}
+
      -h                       This message.
      -c                       Enable color output.
      -v                       Enable verbose output.
@@ -592,6 +714,9 @@ _show_config() {
     "                Call date:   ${call_date}"
     "                Call type:   ${call_type}"
     "      Call authentication:   ${call_auth}"
+    "    Application options:"
+    "          Cache directory:   ${cache_dir}"
+    "           Data directory:   ${data_dir}"
     "    Credentials options:"
     "              Wallet name:   ${wallet_name}"
     "           Wallet address:   ${wallet_address}"
@@ -637,7 +762,7 @@ getopts_opts="$(
     "$(_libevm_app_getopts_params_get)" \
     "a:n:" \
     "$(_wallet_getopts_params_get)" \
-    "cvh")"
+    "W:D:cvh")"
 while \
   getopts \
     "${getopts_opts}" \
@@ -674,6 +799,10 @@ while \
       override_call_auth="y" ;;
     n)
       override_target_network="${OPTARG}" ;;
+    W)
+      override_cache_dir="${OPTARG}" ;;
+    D)
+      override_data_dir="${OPTARG}" ;;
     c)
       override_color="y" ;;
     v)
@@ -747,6 +876,8 @@ app_opts=(
   "${retries_max}"
   "${target_network}"
   "${rpc_selection}"
+  "${cache_dir}"
+  "${data_dir}"
   "${contract_address}"
   "${contract_abi}"
   "${contract_bytecode}"

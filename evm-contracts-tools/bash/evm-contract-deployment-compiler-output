@@ -112,11 +112,17 @@ _contract_compiler_output_get() {
     if [[ -e "${_contract_compiler_output}" ]]; then
       _found="true"
       break
+    else
+      _msg=(
+        "Not found '${_contract_compiler_output}'."
+      )
+      _msg_info \
+        "${_msg[*]}"
     fi
   done
   if [[ "${_found}" == "false" ]]; then
     _msg=(
-      "No ABI for contract '${_contract}'"
+      "No compiler output for contract '${_contract}'"
       "on network '${_network}'"
       "found at path '${_deployments}'."
     )

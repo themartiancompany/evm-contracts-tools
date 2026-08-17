@@ -118,6 +118,40 @@ _artifact_missing_reset() {
   fi
 }
 
+_contract_address_get() {
+  local \
+    _target_app \
+    _target_contract \
+    _target_network \
+    _contract_address \
+    _evm_contract_deployment_address_opts=()
+  _target_app="${target_app}"
+  _target_contract="${target_contract}"
+  _target_network="${target_network}"
+  if (( 0 < "$#" )); then
+    _target_app="${1}"
+  fi
+  if (( 1 < "$#" )); then
+    _target_contract="${2}"
+  fi
+  if (( 2 < "$#" )); then
+    _target_contract="${3}"
+  fi
+  _evm_contract_deployment_address_opts+=(
+    -a
+      "${_target_app}"
+    -n
+      "${_target_network}"
+  )
+  _contract_address="$(
+    evm-contract-deployment-address \
+      "${_evm_contract_deployment_address_opts[@]}" \
+      "${_target_contract}" || \
+      true)"
+  echo \
+    "${_contract_address}"
+}
+
 _target_contract_get() {
   local \
     _target_app="${1}" \
@@ -163,6 +197,51 @@ _target_app_get() {
   fi
   echo \
     "${_target_app}"
+}
+
+_contract_address_auto_detect() {
+  local \
+    _contract_address
+  _contract_address=""
+  if [[ "${target_app}" != "" && \
+        "${target_network}" != "" && \
+        "${target_contract}" != "" ]]; then
+    _msg=(
+      "Looking for address"
+      "corresponding to contract"
+      "'${_target_contract}' for the"
+      "'${target_app}'"
+      "libEVM application on network"
+      "'${target_network}'."
+    )
+    _contract_address="$(
+      _contract_address_get \
+        "${target_app}" \
+        "${target_contract}" \
+        "${target_network}")"
+  fi
+  _set_override \
+    "contract" \
+    "address" \
+    "${_contract_address}"
+}
+
+_target_contract_auto_detect() {
+  local \
+    _target_contract
+  _target_contract=""
+  if [[ "${target_app}" != "" ]]; then
+    if [[ "${contract_address}" != "" ]]; then
+      _target_contract="$(
+        _target_contract_get \
+          "${target_app}" \
+          "${contract_address}")"
+    fi
+  fi
+  _set_override \
+    "target" \
+    "contract" \
+    "${_target_contract}"
 }
 
 _target_app_auto_detect() {
@@ -396,7 +475,8 @@ _default_artifact_path_get() {
     fi
   fi
   _type="${_type//_/-}"
-  _artifact_type_check
+  _artifact_type_check \
+    "${_type}"
   if [[ "${_app}" == "" ]]; then
     _artifact_dir="${_data_dir}/${_network}"
     if [[ "${_type}" == "abi" ]]; then
@@ -415,7 +495,7 @@ _default_artifact_path_get() {
     )
     _artifact="$(
       "evm-contract-deployment-${_type}" \
-        "${_contract_deployment_artifact_opts[@]}"
+        "${_evm_contract_deployment_artifact_opts[@]}" \
         "${_address}")"
   fi
   echo \
@@ -543,10 +623,8 @@ _set_overrides() {
     "0"
   _api_key_auto_detect \
     "${target_network}"
-  _target_address_auto_detect
-  if [[ "${target_app}" != "" ]]; then
-
-  fi
+  _target_contract_auto_detect
+  _contract_address_auto_detect
   if [[ "${contract_address}" != "" ]]; then
     if [[ "${target_app}" == "" ]]; then
       _sanity_enforce="1"
@@ -732,6 +810,7 @@ _show_config() {
     "                Gas price:   ${price_gas}"
     "       Contract options:"
     "       Target application:   ${target_app}"
+    "          Target contract:   ${target_contract}"
     "         Contract address:   ${contract_address}"
     "             Contract ABI:   ${contract_abi}"
     "        Contract bytecode:   ${contract_bytecode}"

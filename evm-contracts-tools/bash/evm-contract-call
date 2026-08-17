@@ -201,29 +201,52 @@ _target_app_get() {
 
 _contract_address_auto_detect() {
   local \
-    _contract_address
+    _contract_address \
+    _address_sanity \
+    _msg=()
   _contract_address=""
-  if [[ "${target_app}" != "" && \
-        "${target_network}" != "" && \
-        "${target_contract}" != "" ]]; then
-    _msg=(
-      "Looking for address"
-      "corresponding to contract"
-      "'${_target_contract}' for the"
-      "'${target_app}'"
-      "libEVM application on network"
-      "'${target_network}'."
-    )
-    _contract_address="$(
-      _contract_address_get \
-        "${target_app}" \
-        "${target_contract}" \
-        "${target_network}")"
+  if [[ "${contract_address}" != "" ]]; then
+    _address_sanity="$(
+      _address_sanity_check \
+        "${_contract_address}" \
+        0 \
+        2>&1)"
+    if [[ "${_address_sanity}" != "" ]]; then
+      if [[ "${target_app}" != "" && \
+            "${target_network}" != "" && \
+            "${target_contract}" != "" ]]; then
+        _msg=(
+          "Looking for address"
+          "corresponding to contract"
+          "'${_target_contract}' for the"
+          "'${target_app}'"
+          "libEVM application on network"
+          "'${target_network}'."
+        )
+        _msg_info \
+          "${_msg[*]}"
+        _contract_address="$(
+          _contract_address_get \
+            "${target_app}" \
+            "${target_contract}" \
+            "${target_network}")"
+      _set \
+        "contract" \
+        "address" \
+        "${_contract_address}"
+      fi
+    else
+      _msg=(
+        "One between the"
+        "application '${target_app}',"
+        "the network '${target_network}'"
+        "or the contract '${target_contract}'"
+        "has not been specified."
+      )
+      _msg_info \
+        "${_msg[*]}"
+    fi
   fi
-  _set_override \
-    "contract" \
-    "address" \
-    "${_contract_address}"
 }
 
 _target_contract_auto_detect() {

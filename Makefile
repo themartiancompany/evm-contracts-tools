@@ -24,12 +24,14 @@
 #    along with this program.
 #    If not, see <https://www.gnu.org/licenses/>.
 
+_NPM ?= true
 PREFIX ?= /usr/local
 _PROJECT=evm-contracts-tools
+_PROJECT_NPM=$(_PROJECT)
 DOC_DIR=$(DESTDIR)$(PREFIX)/share/doc/$(_PROJECT)
 BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
-LIB_DIR=$(DESTDIR)$(PREFIX)/lib
+LIB_DIR=$(DESTDIR)$(PREFIX)/lib/$(_PROJECT)
 
 _INSTALL_FILE=\
   install \
@@ -85,7 +87,8 @@ _INSTALL_TARGETS=\
 _INSTALL_TARGETS_ALL=\
   install \
   $(_INSTALL_TARGETS) \
-  $(_INSTALL_SCRIPTS_TARGETS)
+  $(_INSTALL_SCRIPTS_TARGETS) \
+  install-npm
 
 _PHONY_TARGETS=\
   $(_CHECK_TARGETS_ALL) \
@@ -160,11 +163,55 @@ install-bash-scripts:
 
 install-node-scripts:
 
-	for _file in $(_NODE_FILES); do \
-	  $(_INSTALL_EXE) \
-	    "$(_PROJECT)/nodejs/lib/$${_file}" \
-	    "$(LIB_DIR)/$(_PROJECT)/$${_file}"; \
-	done
+	_node_submodule="$$( \
+          ls \
+	    "$(_PROJECT)/nodejs")"; \
+	if [[ "$${_node_submodule}" == "" ]]; then \
+	  git \
+	    submodule \
+	      update \
+	      --init \
+	        "$(_PROJECT)/nodejs"; \
+	fi
+	if [[ "$(_NPM)" == "false" ]]; then \
+	  $(_INSTALL_DIR) \
+	    "$(LIB_DIR)/nodejs"; \
+	  cp \
+	    -r \
+	    $$(printf \
+	         "${PWD}/$(_PROJECT)/nodejs/%s " \
+	         $$(cat \
+	              "$(_PROJECT)/nodejs/package.json" | \
+	              jq \
+	                --raw-output \
+	                '.files[]')) \
+	    "$(LIB_DIR)/nodejs"; \
+	  for _file in "$(_PROJECT)/nodejs/lib/"*; do \
+	    _name="$$( \
+	      basename \
+	        "$${_file}")"; \
+	    rm \
+	      "$(LIB_DIR)/$${_name}"; \
+	    ln \
+	      -s \
+	      "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/$${_name}" \
+	      "$(LIB_DIR)/$${_name}" || \
+	      true; \
+	  done; \
+	  if [[ ! -d "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" ]]; then \
+	    ln \
+	      -s \
+	      "$(PREFIX)/lib/$(_PROJECT)/nodejs" \
+	      "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)"; \
+	  fi; \
+	elif [[ "$(_NPM)" == "true" ]]; then \
+	  make \
+	    install-npm; \
+	  ln \
+	   -s \
+	   "$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" \
+	   "$(LIB_DIR)/nodejs"; \
+	fi
 
 install-doc:
 
@@ -179,5 +226,18 @@ install-man:
 	  "man"; \
 	  make \
 	    install-man
+
+install-npm:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs" || \
+	true
+	cd \
+	  "$(_PROJECT)/nodejs"; \
+	make \
+	  install-npm
 
 .PHONY: $(_PHONY_TARGETS)

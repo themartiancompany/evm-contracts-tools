@@ -42,6 +42,12 @@ _INSTALL_DIR=\
 _INSTALL_EXE=\
   install \
     -vDm755
+_MAKE_EXE=\
+  chmod \
+    755
+_MAKE_LINK=\
+  ln \
+    -s
 
 DOC_FILES=\
   $(wildcard \
@@ -192,12 +198,85 @@ install-node-scripts:
 	        "$${_file}")"; \
 	    rm \
 	      "$(LIB_DIR)/$${_name}"; \
-	    ln \
-	      -s \
+	    $(_MAKE_LINK) \
 	      "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/$${_name}" \
 	      "$(LIB_DIR)/$${_name}" || \
 	      true; \
 	  done; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/evm-contract-call-static"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/evm-contract-call-static" \
+	    "$(BIN_DIR)/evm-contract-call-static" || \
+	    true; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/libevm-contract-call-static" \
+	    "$(BIN_DIR)/evm-contract-call-static.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/evm-contract-call-dynamic"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/evm-contract-call-dynamic" \
+	    "$(BIN_DIR)/evm-contract-call-dynamic" || \
+	    true; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/evm-contract-call-dynamic" \
+	    "$(BIN_DIR)/evm-contract-call-dynamic.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/address-check"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/address-check" \
+	    "$(BIN_DIR)/ethereum-address-validate" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-call"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-call" \
+	    "$(BIN_DIR)/evm-contract-call.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-address"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-address" \
+	    "$(BIN_DIR)/evm-contract-deployment-address.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-abi"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-abi" \
+	    "$(BIN_DIR)/evm-contract-deployment-abi.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-bytecode"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-bytecode" \
+	    "$(BIN_DIR)/evm-contract-deployment-bytecode.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-compiler-output"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-compiler-output" \
+	    "$(BIN_DIR)/evm-contract-deployment-compiler-output.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-compiler-output"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-networks" \
+	    "$(BIN_DIR)/evm-contract-deployment-networks.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-versions"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployment-versions" \
+	    "$(BIN_DIR)/evm-contract-deployment-versions.js" || \
+	    true; \
+	  $(_MAKE_EXE) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployments-dir"; \
+	  $(_MAKE_LINK) \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs/evm-contract-deployments-dir" \
+	    "$(BIN_DIR)/evm-contract-deployments-dir.js" || \
+	    true; \
 	  if [[ ! -d "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" ]]; then \
 	    ln \
 	      -s \

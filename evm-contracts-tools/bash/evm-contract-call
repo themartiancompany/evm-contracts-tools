@@ -135,7 +135,7 @@ _contract_address_get() {
     _target_contract="${2}"
   fi
   if (( 2 < "$#" )); then
-    _target_contract="${3}"
+    _target_network="${3}"
   fi
   _evm_contract_deployment_address_opts+=(
     -a
@@ -230,10 +230,6 @@ _contract_address_auto_detect() {
             "${target_app}" \
             "${target_contract}" \
             "${target_network}")"
-      _set \
-        "contract" \
-        "address" \
-        "${_contract_address}"
       fi
     else
       _msg=(
@@ -247,6 +243,10 @@ _contract_address_auto_detect() {
         "${_msg[*]}"
     fi
   fi
+  _set \
+    "contract" \
+    "address" \
+    "${_contract_address}"
 }
 
 _target_contract_auto_detect() {
@@ -269,8 +269,7 @@ _target_contract_auto_detect() {
 
 _target_app_auto_detect() {
   local \
-    _target_app \
-    _address_sanity
+    _target_app
   _target_app=""
   if [[ "${contract_address}" != "" ]]; then
     _target_app="$(

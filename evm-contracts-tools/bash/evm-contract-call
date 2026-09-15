@@ -571,6 +571,7 @@ _set_overrides() {
   local \
     _abi \
     _bytecode \
+    _cache_dir \
     _compiler_output \
     _data_dir \
     _sanity_enforce
@@ -584,16 +585,17 @@ _set_overrides() {
   elif [[ -z "${color}" ]]; then
     color="n"
   fi
-  _override_set \
-    "data" \
-    "dir" \
-    "${HOME}/.local/share/${app_name}"
+  _cache_dir="${HOME}/.cache/${app_name}"
   _override_set \
     "cache" \
     "dir" \
     "${HOME}/.cache/${app_name}"
-  _target_app_auto_detect
   _data_dir="${HOME}/.local/share/${app_name}"
+  _override_set \
+    "data" \
+    "dir" \
+    "${_data_dir}"
+  _target_app_auto_detect
   _set_override \
     "call" \
     "date" \

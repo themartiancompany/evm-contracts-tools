@@ -89,6 +89,21 @@ ur \
   evm-contracts-tools
 ```
 
+The package has been released on the
+[NodeJS Package Registry](
+  https://npmjs.com/package/evm-contracts-tools)
+as well as `evm-contracts-tools` and can be installed
+with
+
+```bash
+npm \
+  install \
+    evm-contracts-tools
+```
+
+The NPM Registry package does not include the Bash code
+and it's fully in Javascript.
+
 A censorable HTTP Github mirror of the recipe published there,
 containing a full list of the software dependencies needed to run the
 tools is hosted on
